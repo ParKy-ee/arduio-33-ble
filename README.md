@@ -7,6 +7,18 @@ Rev2. Set `SENSOR_POINT` in `platformio.ini` to one of `chest`, `lumbar`,
 `right_forearm`, `left_thigh`, `right_thigh`, `left_shin`, or `right_shin` before
 flashing each board. Each board must have a unique point name.
 
+The default Upload action uses `nano33ble` (first generation) only. To upload
+explicitly, use:
+
+```powershell
+pio run -e nano33ble -t upload
+```
+
+Only use `-e nano33ble_rev2` for a board marked Rev2. If the upload loses the
+COM port after its 1200 bps reset, double-press the board's RESET button to
+enter bootloader mode, check which COM port Windows shows, then retry. Close
+Serial Monitor or capture.py first.
+
 The firmware sends CSV through USB serial at 115200 baud. It targets 100 Hz and
 reports acceleration in m/s² and angular speed in rad/s, matching the simulation
 columns. `boot_ms` and `seq` expose dropped samples and board restarts. The host
