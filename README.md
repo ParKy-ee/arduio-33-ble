@@ -15,9 +15,17 @@ pio run -e nano33ble -t upload
 ```
 
 Only use `-e nano33ble_rev2` for a board marked Rev2. If the upload loses the
-COM port after its 1200 bps reset, double-press the board's RESET button to
-enter bootloader mode, check which COM port Windows shows, then retry. Close
-Serial Monitor or capture.py first.
+COM port after its 1200 bps reset, close Serial Monitor and capture.py, then
+double-press RESET to enter bootloader mode (the status LED should pulse).
+Run `pio device list` and note the port shown while the board is in bootloader
+mode. Retry with that port explicitly:
+
+```powershell
+pio run -e nano33ble -t upload --upload-port COM7
+```
+
+Replace `COM7` with the port listed on your computer. The bootloader can appear
+as a different COM port from the normal sketch.
 
 The firmware sends CSV through USB serial at 115200 baud. It targets 100 Hz and
 reports acceleration in m/s² and angular speed in rad/s, matching the simulation

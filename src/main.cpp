@@ -20,21 +20,27 @@ constexpr uint32_t kSamplePeriodMs = 10;  // Target 100 Hz.
 
 uint32_t nextSampleMs = 0;
 uint32_t sequence = 0;
+uint32_t nextSensorStatusMs = 0;
 
 void setup() {
   Serial.begin(115200);
   while (!Serial && millis() < 5000) {
   }
 
+  Serial.print("# starting IMU for point ");
+  Serial.println(STRINGIFY(SENSOR_POINT));
+
   if (!IMU.begin()) {
-    Serial.println("# IMU initialization failed; check board revision and environment");
     while (true) {
+      Serial.println("# ERROR: IMU.begin() failed; check board revision and selected environment");
       delay(1000);
     }
   }
 
+  Serial.println("# IMU initialized");
   Serial.println("sensor_id,boot_ms,seq,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z");
   nextSampleMs = millis();
+  nextSensorStatusMs = nextSampleMs;
 }
 
 void loop() {
@@ -44,7 +50,16 @@ void loop() {
   }
   nextSampleMs = now + kSamplePeriodMs;
 
-  if (!IMU.accelerationAvailable() || !IMU.gyroscopeAvailable()) {
+  const bool accelerationReady = IMU.accelerationAvailable();
+  const bool gyroscopeReady = IMU.gyroscopeAvailable();
+  if (!accelerationReady || !gyroscopeReady) {
+    if (static_cast<int32_t>(now - nextSensorStatusMs) >= 0) {
+      Serial.print("# waiting for sensors: accel=");
+      Serial.print(accelerationReady ? "ready" : "no data");
+      Serial.print(" gyro=");
+      Serial.println(gyroscopeReady ? "ready" : "no data");
+      nextSensorStatusMs = now + 1000;
+    }
     return;
   }
 
