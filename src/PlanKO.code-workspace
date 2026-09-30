@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "D:/planl/PlanKO"
+		},
+		{
+			"name": "PlanKO",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"prisma-smart-formatter.typescript.defaultFormatter": "esbenp.prettier-vscode",
+		"prisma-smart-formatter.prisma.defaultFormatter": "Prisma.prisma",
+		"java.configuration.updateBuildConfiguration": "interactive"
+	}
+}

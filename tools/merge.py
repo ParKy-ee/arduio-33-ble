@@ -63,7 +63,7 @@ def main():
     points = sorted(recordings)
     fields = ["time_s"] + [f"{signal}_{point}_{axis}"
                              for point in points
-                             for signal in ("accel", "gyro")
+                             for signal in ("accel", "gyro", "mag")
                              for axis in AXES]
     args.output.parent.mkdir(parents=True, exist_ok=True)
     count = 0
@@ -77,9 +77,11 @@ def main():
                 row = nearest(recordings[point], times[point], target,
                               args.tolerance_ms / 1000)
                 if row:
-                    for signal in ("accel", "gyro"):
+                    for signal in ("accel", "gyro", "mag"):
                         for axis in AXES:
-                            output[f"{signal}_{point}_{axis}"] = row[f"{signal}_{axis}"]
+                            source = f"{signal}_{axis}"
+                            if source in row:
+                                output[f"{signal}_{point}_{axis}"] = row[source]
             writer.writerow(output)
             count += 1
     print(f"Wrote {count} synchronized rows for {', '.join(points)} to {args.output}")

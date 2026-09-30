@@ -8,8 +8,15 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+from view_imu import estimate_angles, read_capture
 
-FIELDS = ["sensor_id", "host_time_s", "boot_ms", "seq", "accel_x", "accel_y", "accel_z", "gyro_x", "gyro_y", "gyro_z"]
+
+FIELDS = [
+    "sensor_id", "host_time_s", "boot_ms", "seq",
+    "accel_x", "accel_y", "accel_z",
+    "gyro_x", "gyro_y", "gyro_z",
+    "mag_x", "mag_y", "mag_z",
+]
 POINTS = {
     "chest", "lumbar", "pelvis", "neck", "head",
     "left_upper_arm", "right_upper_arm", "left_forearm", "right_forearm",
@@ -37,7 +44,10 @@ def main():
     writer = None
     point = None
     count = 0
-    first_host = None
+    first_boot_ms = None
+    last_boot_ms = None
+    first_sequence = None
+    last_sequence = None
 
     try:
         with serial.Serial(args.port, args.baud, timeout=1) as source:
@@ -52,14 +62,16 @@ def main():
                 if not line or line.startswith("#") or line.startswith("sensor_id,"):
                     continue
                 values = line.split(",")
-                if len(values) != 9:
+                if len(values) not in (9, 12):
                     continue
                 sensor_id = values[0]
                 if sensor_id not in POINTS or not re.fullmatch(r"[a-z_]+", sensor_id):
                     continue
                 try:
                     int(values[1]); int(values[2])
-                    [float(value) for value in values[3:]]
+                    [float(value) for value in values[3:9]]
+                    if len(values) == 12:
+                        [float(value) for value in values[9:] if value]
                 except ValueError:
                     continue
                 if point is None:
@@ -68,13 +80,19 @@ def main():
                     handle = path.open("w", newline="", encoding="utf-8")
                     writer = csv.writer(handle)
                     writer.writerow(FIELDS)
-                    first_host = received
                     print(f"Writing {path}")
                 if sensor_id != point:
                     print(f"Ignoring unexpected sensor_id {sensor_id}")
                     continue
-                writer.writerow([sensor_id, f"{received:.6f}", *values[1:]])
+                mag_values = values[9:12] if len(values) == 12 else ["", "", ""]
+                writer.writerow([sensor_id, f"{received:.6f}", *values[1:9], *mag_values])
                 count += 1
+                boot_ms = int(values[1])
+                if first_boot_ms is None:
+                    first_boot_ms = boot_ms
+                    first_sequence = int(values[2])
+                last_boot_ms = boot_ms
+                last_sequence = int(values[2])
                 if count % 100 == 0:
                     handle.flush()
     except KeyboardInterrupt:
@@ -82,21 +100,22 @@ def main():
     finally:
         if handle:
             handle.close()
-            metadata = {
-                "sensor_id": point,
-                "port": args.port,
-                "started_utc": started.isoformat(),
-                "first_host_time_s": first_host,
-                "samples": count,
-                "accelerometer_units": "m/s^2",
-                "gyroscope_units": "rad/s",
-                "sensor_frame": "sensor local axes; mount orientation must be calibrated",
-                "position_note": "An IMU does not directly measure world position.",
-            }
-            path.with_name(path.stem + "_metadata.json").write_text(
-                json.dumps(metadata, indent=2), encoding="utf-8"
-            )
             print(f"Saved {count} samples to {path}")
+            rate = (
+                round((last_sequence - first_sequence) * 1000
+                      / (last_boot_ms - first_boot_ms), 2)
+                if count > 1 and last_boot_ms > first_boot_ms else None
+            )
+            if rate is not None:
+                gaps = max(0, last_sequence - first_sequence + 1 - count)
+                print(f"Firmware sample rate: {rate} Hz; sequence gaps: {gaps}")
+
+            angles = estimate_angles(read_capture(path))
+            numeric_rows = [[round(value, 6) for value in row] for row in angles]
+            orientation_path = path.with_name(path.stem + "_orientation.json")
+            orientation_path.write_text(json.dumps(numeric_rows, indent=2) + "\n",
+                                        encoding="utf-8")
+            print(f"Saved {len(numeric_rows)} numeric [roll, pitch, yaw] rows (radians) to {orientation_path}")
 
 
 if __name__ == "__main__":
