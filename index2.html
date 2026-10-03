@@ -1,0 +1,1019 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1118">
+  <title>IMU Rotation Simulator</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1118;
+      --panel: #111b25;
+      --panel-2: #152230;
+      --line: #263847;
+      --text: #e9f1f7;
+      --muted: #91a5b5;
+      --mint: #74f0c2;
+      --blue: #6ca9ff;
+      --orange: #ffb86b;
+      --red: #ff7777;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 52% -12%, rgba(43, 108, 121, .23), transparent 48%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button, select, .file-button {
+      color: var(--text);
+      background: #15212c;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      min-height: 39px;
+    }
+    button, .file-button { cursor: pointer; }
+    button:hover, button:focus-visible, select:focus-visible, .file-button:hover {
+      border-color: #54c7aa;
+      outline: none;
+    }
+    button:disabled { opacity: .44; cursor: default; }
+    .shell { width: min(1280px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 42px; }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 23px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px;
+      color: var(--mint); background: rgba(116, 240, 194, .1); border: 1px solid rgba(116, 240, 194, .25);
+      font-size: 20px; font-weight: 800;
+    }
+    h1 { margin: 0; font-size: clamp(20px, 3vw, 27px); letter-spacing: -.025em; }
+    .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .live-chip { display: inline-flex; align-items: center; gap: 8px; color: #b9c9d3; font-size: 12px; white-space: nowrap; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px rgba(116, 240, 194, .65); }
+    .toolbar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+      padding: 13px; background: rgba(17, 27, 37, .88); border: 1px solid var(--line); border-radius: 13px;
+    }
+    .file-wrap { position: relative; overflow: hidden; }
+    .file-wrap input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    .file-button { display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; font-size: 13px; }
+    .tool-button { padding: 0 13px; font-size: 13px; }
+    .tool-button.primary { color: #061711; background: var(--mint); border-color: var(--mint); font-weight: 750; }
+    .tool-button.primary:hover { background: #9af5d2; }
+    .toolbar-spacer { flex: 1; }
+    .field { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+    .field select { padding: 0 27px 0 10px; min-width: 98px; font-size: 12px; }
+    .field select:disabled { opacity: .45; }
+    .stage-grid { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 14px; margin-top: 14px; align-items: stretch; }
+    .visual-card, .side-card { background: rgba(17, 27, 37, .91); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .visual-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 15px 18px 12px; }
+    .visual-title { font-weight: 700; font-size: 14px; }
+    .visual-caption { color: var(--muted); font-size: 11px; margin-top: 3px; }
+    .source-label { color: var(--mint); font-size: 11px; text-align: right; }
+    .canvas-wrap { position: relative; padding: 0 10px; }
+    canvas { display: block; width: 100%; height: clamp(300px, 49vw, 510px); border-radius: 10px; background: #0d151e; }
+    .canvas-hint { position: absolute; left: 23px; bottom: 11px; color: #748a9a; font-size: 10px; pointer-events: none; }
+    .transport { padding: 12px 17px 16px; }
+    .timeline-row { display: grid; grid-template-columns: 39px minmax(0, 1fr) 105px; gap: 12px; align-items: center; }
+    .icon-button { width: 37px; height: 37px; padding: 0; display: grid; place-items: center; color: var(--mint); font-size: 15px; }
+    input[type="range"] { width: 100%; accent-color: var(--mint); cursor: pointer; }
+    .time-display { text-align: right; color: #c4d1da; font-size: 11px; font-variant-numeric: tabular-nums; }
+    .transport-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 10px; margin: 5px 2px 0 50px; }
+    .side-card { padding: 17px; }
+    .side-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 0 13px; font-size: 13px; }
+    .sensor-pill { padding: 4px 8px; border-radius: 999px; background: rgba(108, 169, 255, .12); color: #a9caff; font-size: 10px; font-weight: 650; }
+    .angle-list { display: grid; gap: 8px; }
+    .angle-row { display: grid; grid-template-columns: 54px 1fr auto; gap: 8px; align-items: center; padding: 10px; border-radius: 9px; background: var(--panel-2); }
+    .angle-name { color: var(--muted); font-size: 11px; }
+    .angle-value { font-size: 19px; font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+    .angle-unit { color: #718696; font-size: 10px; }
+    .axis-mark { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: 1px; }
+    .axis-x { background: #ff7272; }.axis-y { background: #79dfa9; }.axis-z { background: #76aaff; }
+    .divider { height: 1px; background: var(--line); margin: 16px 0 14px; }
+    .sensor-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .sensor-heading strong { font-size: 12px; }
+    .sensor-heading span { color: var(--muted); font-size: 10px; }
+    .vector-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
+    .vector-cell { padding: 8px 9px; background: #0d151e; border: 1px solid #1c2c39; border-radius: 8px; }
+    .vector-cell small { display: block; color: #728797; font-size: 9px; margin-bottom: 3px; }
+    .vector-cell b { font-size: 11px; font-variant-numeric: tabular-nums; font-weight: 600; }
+    .filter-note { margin-top: 13px; padding: 10px; border-radius: 9px; color: #a7b8c5; background: rgba(116, 240, 194, .055); border: 1px solid rgba(116, 240, 194, .13); font-size: 10px; line-height: 1.55; }
+    .filter-note strong { color: var(--mint); font-weight: 700; }
+    .message { min-height: 17px; margin: 10px 3px 0; color: var(--muted); font-size: 11px; }
+    .message.error { color: #ff9292; }
+    .bottom-note { margin: 13px 3px 0; color: #728696; font-size: 10px; line-height: 1.6; }
+    @media (max-width: 900px) {
+      .stage-grid { grid-template-columns: 1fr; }
+      .side-card { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; }
+      .side-card > .side-heading, .side-card > .filter-note { grid-column: 1 / -1; }
+      .side-card > .divider { display: none; }
+      .sensor-block { align-self: center; }
+    }
+    @media (max-width: 620px) {
+      .shell { width: calc(100% - 22px); padding-top: 18px; }
+      .topline { align-items: flex-start; }
+      .live-chip { display: none; }
+      .toolbar { gap: 8px; }
+      .toolbar-spacer { display: none; }
+      .field { flex: 1 1 44%; justify-content: space-between; }
+      .field select { flex: 1; }
+      .file-wrap, .file-button { flex: 1; }
+      .tool-button { flex: 1; }
+      canvas { height: 330px; }
+      .side-card { display: block; }
+      .side-card > .divider { display: block; }
+      .timeline-row { grid-template-columns: 38px minmax(0, 1fr) 82px; gap: 8px; }
+      .transport-meta { margin-left: 46px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topline">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">↻</div>
+        <div>
+          <h1>IMU Rotation Simulator</h1>
+          <p class="subtitle">ทดลองหมุนบอร์ดจากข้อมูลเซนเซอร์ 3 แกน</p>
+        </div>
+      </div>
+      <div class="live-chip"><i class="live-dot"></i><span id="liveStatus">พร้อมจำลอง</span></div>
+    </header>
+
+    <section class="toolbar" aria-label="ตัวเลือกไฟล์และเซนเซอร์">
+      <label class="file-wrap">
+        <span class="file-button">↥ &nbsp;เปิดไฟล์ CSV</span>
+        <input id="fileInput" type="file" accept=".csv,text/csv" aria-label="เลือกไฟล์ CSV">
+      </label>
+      <button class="tool-button primary" id="demoButton" type="button">▶ &nbsp;เล่นตัวอย่างหมุน</button>
+      <button class="tool-button" id="exportButton" type="button" disabled>↓ &nbsp;ส่งออกมุม CSV</button>
+      <span class="toolbar-spacer"></span>
+      <label class="field">เซนเซอร์
+        <select id="sensorSelect" disabled aria-label="เลือกเซนเซอร์"><option>—</option></select>
+      </label>
+      <label class="field">ไจโร
+        <select id="unitSelect" disabled aria-label="เลือกหน่วยไจโร">
+          <option value="auto">อัตโนมัติ</option>
+          <option value="dps">องศา/วินาที</option>
+          <option value="rads">เรเดียน/วินาที</option>
+        </select>
+      </label>
+      <label class="field">ความเร็ว
+        <select id="speedSelect" aria-label="ความเร็วเล่นข้อมูล">
+          <option value="0.25">0.25×</option>
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+          <option value="4">4×</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="stage-grid">
+      <article class="visual-card">
+        <div class="visual-head">
+          <div>
+            <div class="visual-title">ทิศทางบอร์ด</div>
+            <div class="visual-caption">แกนสีบนบอร์ด: X แดง · Y เขียว · Z น้ำเงิน</div>
+          </div>
+          <div id="sourceLabel" class="source-label">รอข้อมูล IMU</div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="scene" width="900" height="500" role="img" aria-label="ภาพจำลองการหมุนของบอร์ด IMU"></canvas>
+          <div class="canvas-hint">แกนโลกคงที่อยู่มุมซ้ายล่าง</div>
+        </div>
+        <div class="transport">
+          <div class="timeline-row">
+            <button id="playButton" class="icon-button" type="button" aria-label="เล่น" title="เล่น" disabled>▶</button>
+            <input id="timeline" type="range" min="0" max="0" value="0" aria-label="เลื่อนเวลา" disabled>
+            <div id="timeReadout" class="time-display">00:00.00 / 00:00.00</div>
+          </div>
+          <div class="transport-meta">
+            <span id="frameReadout">ยังไม่มีข้อมูล</span>
+            <span id="rateReadout">— Hz</span>
+          </div>
+        </div>
+      </article>
+
+      <aside class="side-card">
+        <div class="side-heading">
+          <span>มุมวางตัวบอร์ด</span>
+          <span class="sensor-pill" id="sensorBadge">IMU</span>
+        </div>
+        <div class="angle-list">
+          <div class="angle-row">
+            <div class="angle-name"><i class="axis-mark axis-x"></i>Roll</div>
+            <div class="angle-value" id="rollValue">0.0</div><div class="angle-unit">deg</div>
+          </div>
+          <div class="angle-row">
+            <div class="angle-name"><i class="axis-mark axis-y"></i>Pitch</div>
+            <div class="angle-value" id="pitchValue">0.0</div><div class="angle-unit">deg</div>
+          </div>
+          <div class="angle-row">
+            <div class="angle-name"><i class="axis-mark axis-z"></i>Yaw</div>
+            <div class="angle-value" id="yawValue">0.0</div><div class="angle-unit">deg</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="sensor-block">
+          <div class="sensor-heading"><strong>Accelerometer</strong><span id="accelUnit">—</span></div>
+          <div class="vector-row">
+            <div class="vector-cell"><small>X</small><b id="axValue">—</b></div>
+            <div class="vector-cell"><small>Y</small><b id="ayValue">—</b></div>
+            <div class="vector-cell"><small>Z</small><b id="azValue">—</b></div>
+          </div>
+          <div class="sensor-heading" style="margin-top:12px"><strong>Gyroscope</strong><span id="gyroUnit">—</span></div>
+          <div class="vector-row">
+            <div class="vector-cell"><small>X</small><b id="gxValue">—</b></div>
+            <div class="vector-cell"><small>Y</small><b id="gyValue">—</b></div>
+            <div class="vector-cell"><small>Z</small><b id="gzValue">—</b></div>
+          </div>
+          <div class="sensor-heading" id="magHeading" style="margin-top:12px;display:none"><strong>Magnetometer</strong><span>µT</span></div>
+          <div class="vector-row" id="magReadings" style="display:none">
+            <div class="vector-cell"><small>X</small><b id="mxValue">—</b></div>
+            <div class="vector-cell"><small>Y</small><b id="myValue">—</b></div>
+            <div class="vector-cell"><small>Z</small><b id="mzValue">—</b></div>
+          </div>
+        </div>
+        <div class="filter-note" id="filterNote"><strong>รอข้อมูล</strong><br>เปิดไฟล์ CSV หรือกดเล่นตัวอย่าง เพื่อเริ่มจำลองการหมุน</div>
+      </aside>
+    </section>
+    <div id="message" class="message" role="status"></div>
+    <p class="bottom-note">ระบบอ่านมุม Roll/Pitch/Yaw จากคอลัมน์มุมโดยตรง หรือประมาณจาก Accelerometer + Gyroscope (+ Magnetometer ถ้ามี) สำหรับข้อมูลดิบ แกนและทิศการติดตั้งเซนเซอร์มีผลต่อทิศทางที่แสดง</p>
+  </main>
+
+  <script>
+    "use strict";
+
+    const $ = function (id) { return document.getElementById(id); };
+    const canvas = $("scene");
+    const ctx = canvas.getContext("2d");
+    const fileInput = $("fileInput");
+    const demoButton = $("demoButton");
+    const exportButton = $("exportButton");
+    const sensorSelect = $("sensorSelect");
+    const unitSelect = $("unitSelect");
+    const speedSelect = $("speedSelect");
+    const playButton = $("playButton");
+    const timeline = $("timeline");
+    const timeReadout = $("timeReadout");
+    const frameReadout = $("frameReadout");
+    const rateReadout = $("rateReadout");
+    const message = $("message");
+    const liveStatus = $("liveStatus");
+    const sourceLabel = $("sourceLabel");
+    const filterNote = $("filterNote");
+    const DEG = Math.PI / 180;
+    let samples = [];
+    let currentIndex = 0;
+    let playing = false;
+    let lastTick = 0;
+    let animationId = 0;
+    let mode = "empty";
+    let activeSensor = "";
+    let activeSensorLabel = "";
+    let gyroFactor = DEG;
+    let gyroDisplayUnit = "°/s";
+    let sourceName = "";
+    let cachedCsv = null;
+    let cachedName = "";
+
+    function setMessage(text, isError) {
+      message.textContent = text || "";
+      message.className = isError ? "message error" : "message";
+    }
+
+    function clamp(value, low, high) {
+      return Math.max(low, Math.min(high, value));
+    }
+
+    function vecNorm(v) {
+      const n = Math.hypot(v[0], v[1], v[2]);
+      return n > 1e-12 ? [v[0] / n, v[1] / n, v[2] / n] : [0, 0, 0];
+    }
+
+    function cross(a, b) {
+      return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    }
+
+    function qNormalize(q) {
+      const n = Math.hypot(q[0], q[1], q[2], q[3]) || 1;
+      return q.map(function (v) { return v / n; });
+    }
+
+    function qMultiply(a, b) {
+      return [
+        a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3],
+        a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2],
+        a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1],
+        a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0]
+      ];
+    }
+
+    function qConjugate(q) { return [q[0], -q[1], -q[2], -q[3]]; }
+
+    function qRotate(q, v) {
+      const p = qMultiply(qMultiply(q, [0, v[0], v[1], v[2]]), qConjugate(q));
+      return [p[1], p[2], p[3]];
+    }
+
+    function qFromEuler(roll, pitch, yaw) {
+      const cr = Math.cos(roll / 2), sr = Math.sin(roll / 2);
+      const cp = Math.cos(pitch / 2), sp = Math.sin(pitch / 2);
+      const cy = Math.cos(yaw / 2), sy = Math.sin(yaw / 2);
+      return qNormalize([
+        cr * cp * cy + sr * sp * sy,
+        sr * cp * cy - cr * sp * sy,
+        cr * sp * cy + sr * cp * sy,
+        cr * cp * sy - sr * sp * cy
+      ]);
+    }
+
+    function qToEuler(q) {
+      const w = q[0], x = q[1], y = q[2], z = q[3];
+      const roll = Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y));
+      const sinPitch = 2 * (w * y - z * x);
+      const pitch = Math.asin(clamp(sinPitch, -1, 1));
+      const yaw = Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
+      return [roll / DEG, pitch / DEG, yaw / DEG];
+    }
+
+    function qSlerp(a, b, amount) {
+      let end = b;
+      let dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+      if (dot < 0) {
+        dot = -dot;
+        end = b.map(function (v) { return -v; });
+      }
+      if (dot > 0.9995) {
+        return qNormalize(a.map(function (v, i) { return v + amount * (end[i] - v); }));
+      }
+      const theta = Math.acos(clamp(dot, -1, 1));
+      const sinTheta = Math.sin(theta);
+      const left = Math.sin((1 - amount) * theta) / sinTheta;
+      const right = Math.sin(amount * theta) / sinTheta;
+      return qNormalize(a.map(function (v, i) { return left * v + right * end[i]; }));
+    }
+
+    function parseCsvLine(line) {
+      const cells = [];
+      let value = "";
+      let quoted = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') {
+          if (quoted && line[i + 1] === '"') { value += '"'; i++; }
+          else quoted = !quoted;
+        } else if (c === "," && !quoted) {
+          cells.push(value.trim());
+          value = "";
+        } else value += c;
+      }
+      cells.push(value.trim());
+      return cells;
+    }
+
+    function parseCsv(text) {
+      const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter(function (line) { return line.trim().length > 0; });
+      if (lines.length < 2) throw new Error("ไฟล์ CSV ต้องมีแถวหัวคอลัมน์และข้อมูลอย่างน้อย 1 แถว");
+      const headers = parseCsvLine(lines[0]).map(function (h) { return h.trim().toLowerCase(); });
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cells = parseCsvLine(lines[i]);
+        if (cells.length < headers.length) continue;
+        const row = {};
+        headers.forEach(function (header, j) {
+          const value = cells[j] === "" ? NaN : Number(cells[j]);
+          row[header] = Number.isFinite(value) ? value : cells[j];
+        });
+        rows.push(row);
+      }
+      if (!rows.length) throw new Error("ไม่พบแถวข้อมูลตัวเลขในไฟล์ CSV");
+      return { headers: headers, rows: rows };
+    }
+
+    function findHeader(headers, candidates) {
+      for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i].toLowerCase();
+        if (headers.indexOf(candidate) !== -1) return candidate;
+      }
+      return null;
+    }
+
+    function fieldCandidates(kind, sensor, axis) {
+      const low = axis.toLowerCase();
+      const cap = axis.toUpperCase();
+      const all = [];
+      if (sensor) {
+        if (kind === "accel") all.push("accel_" + sensor + "_" + low, "accelerometer_" + sensor + "_" + low, "acceleration_" + sensor + "_" + low);
+        if (kind === "gyro") all.push("gyro_" + sensor + "_" + low, "gyroscope_" + sensor + "_" + low);
+        if (kind === "mag") all.push("mag_" + sensor + "_" + low, "magnetometer_" + sensor + "_" + low);
+      }
+      if (kind === "accel") all.push("a" + low, "a" + low + "_g", "accel_" + low, "accel_" + low + "_g", "accelerometer_" + low, "acceleration_" + low, "acc_" + low, "a_" + low);
+      if (kind === "gyro") all.push("g" + low, "g" + low + "_dps", "gyro_" + low, "gyro_" + low + "_dps", "gyroscope_" + low, "rotation_rate_" + low, "g_" + low);
+      if (kind === "mag") all.push("m" + low, "m" + low + "_ut", "mag_" + low, "magnetometer_" + low, "magnetic_field_" + low);
+      all.push(kind + cap);
+      return all;
+    }
+
+    function getVectorColumns(headers, kind, sensor) {
+      const axes = ["x", "y", "z"];
+      const names = axes.map(function (axis) { return findHeader(headers, fieldCandidates(kind, sensor, axis)); });
+      return names.every(Boolean) ? names : null;
+    }
+
+    function rowVector(row, columns) {
+      if (!columns) return null;
+      const value = columns.map(function (name) { return Number(row[name]); });
+      return value.every(Number.isFinite) ? value : null;
+    }
+
+    function findEulerColumns(headers) {
+      const roll = findHeader(headers, ["roll_deg", "roll", "roll_degrees", "euler_roll", "roll_rad"]);
+      const pitch = findHeader(headers, ["pitch_deg", "pitch", "pitch_degrees", "euler_pitch", "pitch_rad"]);
+      const yaw = findHeader(headers, ["yaw_deg", "yaw", "yaw_degrees", "heading_deg", "heading", "yaw_rad"]);
+      return roll && pitch && yaw ? [roll, pitch, yaw] : null;
+    }
+
+    function findQuaternionColumns(headers) {
+      const sets = [
+        ["qw", "qx", "qy", "qz"],
+        ["q_w", "q_x", "q_y", "q_z"],
+        ["quat_w", "quat_x", "quat_y", "quat_z"],
+        ["quaternion_w", "quaternion_x", "quaternion_y", "quaternion_z"]
+      ];
+      for (let i = 0; i < sets.length; i++) {
+        if (sets[i].every(function (name) { return headers.indexOf(name) !== -1; })) return sets[i];
+      }
+      return null;
+    }
+
+    function detectSensors(headers) {
+      const found = [];
+      headers.forEach(function (header) {
+        const match = header.match(/^(?:gyro|gyroscope|accel|accelerometer|mag|magnetometer)_(.+)_x$/);
+        if (match && found.indexOf(match[1]) === -1) found.push(match[1]);
+      });
+      return found;
+    }
+
+    function parseTime(rows, headers) {
+      let timeColumn = findHeader(headers, ["host_time_s", "host_timestamp_s", "time_s", "timestamp_s", "time_sec", "seconds", "host_time", "time", "timestamp", "timestamp_ms", "time_ms", "boot_ms"]);
+      const isMs = timeColumn && (timeColumn.endsWith("_ms") || timeColumn === "timestamp_ms");
+      const timeRows = rows.map(function (row, i) {
+        const n = timeColumn ? Number(row[timeColumn]) : NaN;
+        return Number.isFinite(n) ? (isMs ? n / 1000 : n) : NaN;
+      });
+      const firstValid = timeRows.find(Number.isFinite);
+      const origin = Number.isFinite(firstValid) ? firstValid : 0;
+      let fallbackDt = 0.02;
+      const valid = timeRows.filter(Number.isFinite);
+      if (valid.length > 1) {
+        const gaps = [];
+        for (let i = 1; i < valid.length; i++) {
+          const gap = valid[i] - valid[i - 1];
+          if (gap > 0) gaps.push(gap);
+        }
+        if (gaps.length) {
+          gaps.sort(function (a, b) { return a - b; });
+          fallbackDt = gaps[Math.floor(gaps.length / 2)];
+        }
+      }
+      return timeRows.map(function (value, i) {
+        return Number.isFinite(value) ? value - origin : i * fallbackDt;
+      });
+    }
+
+    function gyroUnit(headers, selectedSensor) {
+      const gyroNames = headers.filter(function (h) { return /^(?:g[xyz]|gyro|gyroscope)/.test(h); }).join(" ");
+      if (/dps|deg|degree/.test(gyroNames)) return { factor: DEG, label: "°/s" };
+      if (/rad/.test(gyroNames)) return { factor: 1, label: "rad/s" };
+      // The IMU sketch logs SI-converted acceleration and angular speed.
+      if (headers.indexOf("boot_ms") !== -1 && headers.indexOf("sensor_id") !== -1 && headers.indexOf("seq") !== -1) {
+        return { factor: 1, label: "rad/s" };
+      }
+      if (headers.indexOf("host_time_s") !== -1 && headers.indexOf("boot_ms") !== -1) return { factor: 1, label: "rad/s" };
+      if (selectedSensor) return { factor: 1, label: "rad/s" };
+      return { factor: DEG, label: "°/s" };
+    }
+
+    function getInitialOrientation(accel, mag) {
+      let roll = 0, pitch = 0, yaw = 0;
+      if (accel && Math.hypot(accel[0], accel[1], accel[2]) > 1e-8) {
+        roll = Math.atan2(accel[1], accel[2]);
+        pitch = Math.atan2(-accel[0], Math.hypot(accel[1], accel[2]));
+      }
+      if (mag && Math.hypot(mag[0], mag[1], mag[2]) > 1e-8) {
+        const cr = Math.cos(roll), sr = Math.sin(roll);
+        const cp = Math.cos(pitch), sp = Math.sin(pitch);
+        const hx = mag[0] * cp + mag[2] * sp;
+        const hy = mag[0] * sr * sp + mag[1] * cr - mag[2] * sr * cp;
+        yaw = Math.atan2(-hy, hx);
+      }
+      return qFromEuler(roll, pitch, yaw);
+    }
+
+    function makeRawSamples(rows, headers, sensor, unitChoice) {
+      const accelCols = getVectorColumns(headers, "accel", sensor);
+      const gyroCols = getVectorColumns(headers, "gyro", sensor);
+      const magCols = getVectorColumns(headers, "mag", sensor);
+      if (!gyroCols) throw new Error("ไม่พบคอลัมน์ไจโรครบ 3 แกน เช่น gx, gy, gz หรือ gyro_sensor_x/y/z");
+      const detected = gyroUnit(headers, sensor);
+      const factor = unitChoice === "dps" ? DEG : unitChoice === "rads" ? 1 : detected.factor;
+      const displayUnit = unitChoice === "dps" ? "°/s" : unitChoice === "rads" ? "rad/s" : detected.label;
+      const times = parseTime(rows, headers);
+      const raw = rows.map(function (row, i) {
+        return {
+          t: times[i],
+          accel: rowVector(row, accelCols),
+          gyro: rowVector(row, gyroCols),
+          mag: rowVector(row, magCols)
+        };
+      });
+      if (raw.some(function (item) { return !item.gyro; })) {
+        throw new Error("มีแถวที่ค่าไจโรไม่ครบหรือไม่ใช่ตัวเลข กรุณาตรวจ CSV");
+      }
+      const firstAccel = raw[0].accel;
+      const firstMag = raw[0].mag;
+      let q = getInitialOrientation(firstAccel, firstMag);
+      let magReference = firstMag ? vecNorm(qRotate(q, vecNorm(firstMag))) : null;
+      const fused = [];
+      raw.forEach(function (item, i) {
+        if (i > 0) {
+          let dt = item.t - raw[i - 1].t;
+          if (!(dt > 0) || !Number.isFinite(dt)) dt = 0.02;
+          dt = clamp(dt, 0.001, 2);
+          let omega = item.gyro.map(function (v, axis) { return (v + raw[i - 1].gyro[axis]) * 0.5 * factor; });
+          let error = [0, 0, 0];
+          let gain = 0;
+          const accelMagnitude = item.accel ? Math.hypot(item.accel[0], item.accel[1], item.accel[2]) : 0;
+          if (item.accel && accelMagnitude > 1e-8) {
+            const measuredGravity = vecNorm(item.accel);
+            const expectedGravity = [
+              2 * (q[1] * q[3] - q[0] * q[2]),
+              2 * (q[0] * q[1] + q[2] * q[3]),
+              q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3]
+            ];
+            const accelError = cross(measuredGravity, expectedGravity);
+            const expectedMagnitude = accelMagnitude > 3 ? 9.80665 : 1;
+            const magnitudeTrust = clamp(1 - Math.abs(accelMagnitude - expectedMagnitude) / (expectedMagnitude * 0.65), 0.15, 1);
+            error = error.map(function (v, j) { return v + accelError[j] * magnitudeTrust; });
+            gain = 1.8;
+          }
+          if (item.mag && magReference) {
+            const expectedMag = vecNorm(qRotate(qConjugate(q), magReference));
+            const magError = cross(vecNorm(item.mag), expectedMag);
+            error = error.map(function (v, j) { return v + magError[j] * 0.7; });
+            gain = Math.max(gain, 1.25);
+          }
+          omega = omega.map(function (v, j) { return v + error[j] * gain; });
+          const derivative = qMultiply(q, [0, omega[0], omega[1], omega[2]]);
+          q = qNormalize(q.map(function (v, j) { return v + derivative[j] * 0.5 * dt; }));
+        }
+        fused.push({
+          t: item.t, q: q.slice(), accel: item.accel, gyro: item.gyro, mag: item.mag
+        });
+      });
+      return { samples: fused, factor: factor, displayUnit: displayUnit, hasAccel: !!accelCols, hasMag: !!magCols };
+    }
+
+    function makeDirectSamples(rows, headers, eulerCols, quatCols) {
+      const times = parseTime(rows, headers);
+      return rows.map(function (row, i) {
+        let q;
+        if (quatCols) q = qNormalize(quatCols.map(function (column) { return Number(row[column]); }));
+        else {
+          let values = eulerCols.map(function (column) { return Number(row[column]); });
+          if (eulerCols.some(function (column) { return column.endsWith("_rad"); })) values = values.map(function (v) { return v / DEG; });
+          q = qFromEuler(values[0] * DEG, values[1] * DEG, values[2] * DEG);
+        }
+        return { t: times[i], q: q, accel: null, gyro: null, mag: null };
+      });
+    }
+
+    function interpVector(a, b, amount) {
+      if (!a) return b;
+      if (!b) return a;
+      return a.map(function (v, i) { return v + (b[i] - v) * amount; });
+    }
+
+    function frameAt(index) {
+      if (!samples.length) return null;
+      const safe = clamp(index, 0, samples.length - 1);
+      const lower = Math.floor(safe);
+      const upper = Math.min(samples.length - 1, lower + 1);
+      const amount = safe - lower;
+      const a = samples[lower], b = samples[upper];
+      return {
+        t: a.t + (b.t - a.t) * amount,
+        q: qSlerp(a.q, b.q, amount),
+        accel: interpVector(a.accel, b.accel, amount),
+        gyro: interpVector(a.gyro, b.gyro, amount),
+        mag: interpVector(a.mag, b.mag, amount)
+      };
+    }
+
+    function indexAtTime(time) {
+      if (samples.length < 2) return 0;
+      let low = 0, high = samples.length - 1;
+      while (low < high - 1) {
+        const mid = Math.floor((low + high) / 2);
+        if (samples[mid].t <= time) low = mid;
+        else high = mid;
+      }
+      const span = samples[high].t - samples[low].t;
+      const amount = span > 0 ? clamp((time - samples[low].t) / span, 0, 1) : 0;
+      return low + amount;
+    }
+
+    function formatTime(seconds) {
+      const safe = Math.max(0, seconds);
+      const minutes = Math.floor(safe / 60);
+      const secs = safe - minutes * 60;
+      return String(minutes).padStart(2, "0") + ":" + secs.toFixed(2).padStart(5, "0");
+    }
+
+    function updateReadouts(frame) {
+      if (!frame) return;
+      const angles = qToEuler(frame.q);
+      $("rollValue").textContent = angles[0].toFixed(1);
+      $("pitchValue").textContent = angles[1].toFixed(1);
+      $("yawValue").textContent = angles[2].toFixed(1);
+      [["axValue", 0], ["ayValue", 1], ["azValue", 2]].forEach(function (entry) {
+        $(entry[0]).textContent = frame.accel ? frame.accel[entry[1]].toFixed(3) : "—";
+      });
+      [["gxValue", 0], ["gyValue", 1], ["gzValue", 2]].forEach(function (entry) {
+        if (!frame.gyro) $(entry[0]).textContent = "—";
+        else $(entry[0]).textContent = (frame.gyro[entry[1]] * gyroFactor).toFixed(3);
+      });
+      $("accelUnit").textContent = mode === "raw" ? "หน่วยตามไฟล์" : "—";
+      $("gyroUnit").textContent = frame.gyro ? gyroDisplayUnit : "—";
+      $("magHeading").style.display = frame.mag ? "flex" : "none";
+      $("magReadings").style.display = frame.mag ? "grid" : "none";
+      if (frame.mag) {
+        $("mxValue").textContent = frame.mag[0].toFixed(2);
+        $("myValue").textContent = frame.mag[1].toFixed(2);
+        $("mzValue").textContent = frame.mag[2].toFixed(2);
+      }
+      timeline.value = String(Math.round(currentIndex));
+      const elapsed = frame.t - samples[0].t;
+      const duration = samples[samples.length - 1].t - samples[0].t;
+      timeReadout.textContent = formatTime(elapsed) + " / " + formatTime(duration);
+      frameReadout.textContent = "เฟรม " + (Math.floor(currentIndex) + 1).toLocaleString("th-TH") + " / " + samples.length.toLocaleString("th-TH");
+      drawScene(frame.q);
+    }
+
+    function setPlaybackButtons() {
+      playButton.textContent = playing ? "Ⅱ" : "▶";
+      playButton.setAttribute("aria-label", playing ? "หยุดชั่วคราว" : "เล่น");
+      playButton.title = playing ? "หยุดชั่วคราว" : "เล่น";
+      liveStatus.textContent = playing ? "กำลังเล่นข้อมูล" : (samples.length ? "พร้อมจำลอง" : "พร้อมจำลอง");
+    }
+
+    function loadSamples(nextSamples, nextMode, name, note) {
+      samples = nextSamples;
+      mode = nextMode;
+      sourceName = name;
+      currentIndex = 0;
+      playing = false;
+      if (animationId) cancelAnimationFrame(animationId);
+      animationId = 0;
+      timeline.disabled = samples.length < 2;
+      timeline.min = "0";
+      timeline.max = String(Math.max(0, samples.length - 1));
+      timeline.value = "0";
+      playButton.disabled = samples.length < 2;
+      exportButton.disabled = samples.length < 1;
+      sourceLabel.textContent = name;
+      $("sensorBadge").textContent = activeSensor || (nextMode === "direct" ? "Euler / quat" : "IMU");
+      const duration = samples.length > 1 ? samples[samples.length - 1].t - samples[0].t : 0;
+      const averageRate = duration > 0 ? (samples.length - 1) / duration : 0;
+      rateReadout.textContent = averageRate ? averageRate.toFixed(1) + " Hz" : "— Hz";
+      if (note) {
+        filterNote.innerHTML = note;
+      }
+      setPlaybackButtons();
+      updateReadouts(frameAt(0));
+      setMessage("โหลดข้อมูล " + samples.length.toLocaleString("th-TH") + " เฟรมแล้ว");
+    }
+
+    function onCsvLoaded(text, name) {
+      const parsed = parseCsv(text);
+      cachedCsv = parsed;
+      cachedName = name;
+      const headers = parsed.headers;
+      const eulerCols = findEulerColumns(headers);
+      const quatCols = findQuaternionColumns(headers);
+      if (eulerCols || quatCols) {
+        activeSensor = "";
+        activeSensorLabel = "";
+        sensorSelect.innerHTML = "<option>—</option>";
+        sensorSelect.disabled = true;
+        unitSelect.disabled = true;
+        const direct = makeDirectSamples(parsed.rows, headers, eulerCols, quatCols);
+        loadSamples(direct, "direct", name + " · มุมโดยตรง", "<strong>อ่านมุมโดยตรง</strong><br>ใช้คอลัมน์ Roll/Pitch/Yaw หรือ quaternion จาก CSV โดยตรง");
+        $("sensorBadge").textContent = quatCols ? "Quaternion" : "Euler";
+        return;
+      }
+      const sensorNames = detectSensors(headers);
+      activeSensor = sensorNames.length ? sensorNames[0] : "";
+      const idColumn = findHeader(headers, ["sensor_id"]);
+      const idLabels = idColumn ? Array.from(new Set(parsed.rows.map(function (row) { return String(row[idColumn] || "").trim(); }).filter(Boolean))) : [];
+      activeSensorLabel = activeSensor || (idLabels.length ? idLabels.join(", ") : "");
+      sensorSelect.innerHTML = "";
+      if (sensorNames.length) {
+        sensorNames.forEach(function (sensor) {
+          const option = document.createElement("option");
+          option.value = sensor;
+          option.textContent = sensor;
+          sensorSelect.appendChild(option);
+        });
+        sensorSelect.disabled = false;
+      } else {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "บอร์ด";
+        sensorSelect.appendChild(option);
+        sensorSelect.disabled = true;
+      }
+      unitSelect.disabled = false;
+      buildRawForSelection(parsed, headers, name);
+    }
+
+    function buildRawForSelection(parsed, headers, name) {
+      const result = makeRawSamples(parsed.rows, headers, activeSensor, unitSelect.value);
+      gyroFactor = result.factor;
+      gyroDisplayUnit = result.displayUnit;
+      const fusionLabel = result.hasMag ? "9 แกน" : result.hasAccel ? "6 แกน" : "ไจโร";
+      const description = result.hasMag
+        ? "<strong>ประมาณมุมจาก IMU 9 แกน</strong><br>ไจโรติดตามการหมุน และใช้ accelerometer / magnetometer ช่วยปรับการเอียงและทิศหัว"
+        : result.hasAccel
+          ? "<strong>ประมาณมุมจาก IMU 6 แกน</strong><br>Yaw คำนวณจากไจโร จึงอาจคลาดสะสมเมื่อเล่นนาน"
+          : "<strong>อินทิเกรตไจโร</strong><br>มุมจะคลาดสะสมได้ เพราะไม่มี accelerometer หรือ magnetometer ช่วยปรับ";
+      loadSamples(result.samples, "raw", name + " · " + (activeSensor || activeSensorLabel || "บอร์ด"), description);
+      $("sensorBadge").textContent = activeSensor || activeSensorLabel || fusionLabel;
+      if (unitSelect.value === "auto") setMessage("ตรวจพบข้อมูล " + fusionLabel + " · ไจโร " + result.displayUnit);
+    }
+
+    function makeDemo() {
+      const result = [];
+      const hz = 40;
+      const duration = 12;
+      for (let i = 0; i <= hz * duration; i++) {
+        const t = i / hz;
+        const roll = 38 * Math.sin(2 * Math.PI * t / 5.5);
+        const pitch = 25 * Math.sin(2 * Math.PI * t / 7.5 + 0.55);
+        const yaw = 30 * t + 14 * Math.sin(2 * Math.PI * t / 9);
+        result.push({ t: t, q: qFromEuler(roll * DEG, pitch * DEG, yaw * DEG), accel: null, gyro: null, mag: null });
+      }
+      activeSensor = "";
+      activeSensorLabel = "";
+      sensorSelect.innerHTML = "<option>—</option>";
+      sensorSelect.disabled = true;
+      unitSelect.disabled = true;
+      loadSamples(result, "direct", "ตัวอย่างการหมุน 3 แกน", "<strong>ตัวอย่างการหมุน</strong><br>ภาพเคลื่อนไหวนี้สร้างจากมุม Roll/Pitch/Yaw เพื่อทดลอง simulator");
+      $("sensorBadge").textContent = "Demo";
+      setMessage("เล่นตัวอย่างการหมุนหลายแกน");
+      play();
+    }
+
+    function qToCanvasPoint(q, point) {
+      const p = qRotate(q, point);
+      const cameraRight = [Math.SQRT1_2, Math.SQRT1_2, 0];
+      const cameraUp = [-0.34, 0.34, 0.88];
+      const cameraDepth = [0.622, -0.622, 0.477];
+      const x = p[0] * cameraRight[0] + p[1] * cameraRight[1] + p[2] * cameraRight[2];
+      const y = p[0] * cameraUp[0] + p[1] * cameraUp[1] + p[2] * cameraUp[2];
+      const z = p[0] * cameraDepth[0] + p[1] * cameraDepth[1] + p[2] * cameraDepth[2];
+      const scale = Math.min(canvas.width, canvas.height) * 0.43;
+      const perspective = 1 / (1 + z * 0.055);
+      return [canvas.width * 0.53 + x * scale * perspective, canvas.height * 0.49 - y * scale * perspective, z];
+    }
+
+    function drawLine(a, b, color, width, dash) {
+      ctx.beginPath();
+      ctx.moveTo(a[0], a[1]);
+      ctx.lineTo(b[0], b[1]);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dash || []);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function drawScene(q) {
+      const width = canvas.width, height = canvas.height;
+      ctx.clearRect(0, 0, width, height);
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, "#0d1721");
+      gradient.addColorStop(1, "#0b1219");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+      for (let i = 0; i <= 8; i++) {
+        const y = 68 + i * 44;
+        drawLine([0, y], [width, y], "rgba(91,122,143," + (0.035 + i * 0.003) + ")", 1);
+      }
+      for (let i = 0; i <= 12; i++) {
+        const x = i * width / 12;
+        drawLine([x, 48], [x, height - 25], "rgba(91,122,143,.035)", 1);
+      }
+
+      const gridExtent = 2.5;
+      for (let g = -5; g <= 5; g++) {
+        const v = g * gridExtent / 5;
+        const color = g === 0 ? "rgba(125,157,177,.42)" : "rgba(95,126,146,.19)";
+        drawLine(qToCanvasPoint([1, 0, 0, 0], [v, -gridExtent, -0.58]), qToCanvasPoint([1, 0, 0, 0], [v, gridExtent, -0.58]), color, g === 0 ? 1.3 : 1);
+        drawLine(qToCanvasPoint([1, 0, 0, 0], [-gridExtent, v, -0.58]), qToCanvasPoint([1, 0, 0, 0], [gridExtent, v, -0.58]), color, g === 0 ? 1.3 : 1);
+      }
+
+      const corners = [
+        [-0.83, -0.54, -0.10], [0.83, -0.54, -0.10], [0.83, 0.54, -0.10], [-0.83, 0.54, -0.10],
+        [-0.83, -0.54, 0.10], [0.83, -0.54, 0.10], [0.83, 0.54, 0.10], [-0.83, 0.54, 0.10]
+      ];
+      const faces = [
+        { ids: [4, 5, 6, 7], color: "#244238", stroke: "#6bcca5" },
+        { ids: [0, 1, 5, 4], color: "#233344", stroke: "#425c70" },
+        { ids: [1, 2, 6, 5], color: "#1b2b39", stroke: "#425c70" },
+        { ids: [2, 3, 7, 6], color: "#192936", stroke: "#425c70" },
+        { ids: [3, 0, 4, 7], color: "#20313e", stroke: "#425c70" },
+        { ids: [0, 3, 2, 1], color: "#14212c", stroke: "#354b5c" }
+      ].map(function (face) {
+        const points = face.ids.map(function (id) { return qToCanvasPoint(q, corners[id]); });
+        const depth = points.reduce(function (sum, p) { return sum + p[2]; }, 0) / points.length;
+        return { points: points, depth: depth, color: face.color, stroke: face.stroke };
+      }).sort(function (a, b) { return a.depth - b.depth; });
+
+      faces.forEach(function (face) {
+        ctx.beginPath();
+        face.points.forEach(function (p, i) { if (i === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]); });
+        ctx.closePath();
+        ctx.fillStyle = face.color;
+        ctx.fill();
+        ctx.strokeStyle = face.stroke;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+
+      const center = qToCanvasPoint(q, [0, 0, 0.12]);
+      const xTip = qToCanvasPoint(q, [0.66, 0, 0.14]);
+      ctx.beginPath();
+      ctx.moveTo(center[0], center[1]);
+      ctx.lineTo(xTip[0], xTip[1]);
+      ctx.strokeStyle = "#ff7272";
+      ctx.lineWidth = 5;
+      ctx.lineCap = "round";
+      ctx.stroke();
+      const angle = Math.atan2(xTip[1] - center[1], xTip[0] - center[0]);
+      ctx.beginPath();
+      ctx.moveTo(xTip[0], xTip[1]);
+      ctx.lineTo(xTip[0] - 11 * Math.cos(angle - 0.48), xTip[1] - 11 * Math.sin(angle - 0.48));
+      ctx.lineTo(xTip[0] - 11 * Math.cos(angle + 0.48), xTip[1] - 11 * Math.sin(angle + 0.48));
+      ctx.closePath();
+      ctx.fillStyle = "#ff7272";
+      ctx.fill();
+      ctx.fillStyle = "#d7f2e7";
+      ctx.font = "600 17px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("IMU BOARD", center[0], center[1] + 5);
+      ctx.font = "11px system-ui, sans-serif";
+      ctx.fillStyle = "#ff9b9b";
+      ctx.fillText("+X FRONT", xTip[0] + 30 * Math.cos(angle), xTip[1] + 30 * Math.sin(angle) + 4);
+
+      const origin = [62, height - 67];
+      const triad = [
+        { v: [0.7, 0, 0], color: "#ff7272", label: "X" },
+        { v: [0, 0.7, 0], color: "#79dfa9", label: "Y" },
+        { v: [0, 0, 0.7], color: "#76aaff", label: "Z" }
+      ];
+      triad.forEach(function (axis) {
+        const end = qToCanvasPoint([1, 0, 0, 0], axis.v);
+        const dx = end[0] - qToCanvasPoint([1, 0, 0, 0], [0, 0, 0])[0];
+        const dy = end[1] - qToCanvasPoint([1, 0, 0, 0], [0, 0, 0])[1];
+        drawLine(origin, [origin[0] + dx * 0.64, origin[1] + dy * 0.64], axis.color, 2.5);
+        ctx.fillStyle = axis.color;
+        ctx.font = "bold 11px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(axis.label, origin[0] + dx * 0.78, origin[1] + dy * 0.78);
+      });
+      ctx.fillStyle = "#748b9c";
+      ctx.font = "10px system-ui, sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("WORLD AXES", 15, height - 16);
+    }
+
+    function pause() {
+      playing = false;
+      if (animationId) cancelAnimationFrame(animationId);
+      animationId = 0;
+      setPlaybackButtons();
+    }
+
+    function play() {
+      if (samples.length < 2) return;
+      if (currentIndex >= samples.length - 1) currentIndex = 0;
+      playing = true;
+      lastTick = 0;
+      setPlaybackButtons();
+      animationId = requestAnimationFrame(tick);
+    }
+
+    function tick(now) {
+      if (!playing || !samples.length) return;
+      if (!lastTick) lastTick = now;
+      const dt = (now - lastTick) / 1000;
+      lastTick = now;
+      const current = frameAt(currentIndex);
+      const time = current.t + dt * Number(speedSelect.value);
+      const endTime = samples[samples.length - 1].t;
+      if (time >= endTime) {
+        currentIndex = samples.length - 1;
+        playing = false;
+        setPlaybackButtons();
+      } else currentIndex = indexAtTime(time);
+      updateReadouts(frameAt(currentIndex));
+      if (playing) animationId = requestAnimationFrame(tick);
+      else animationId = 0;
+    }
+
+    function exportAngles() {
+      if (!samples.length) return;
+      const lines = ["time_s,roll_deg,pitch_deg,yaw_deg"];
+      samples.forEach(function (sample) {
+        const angles = qToEuler(sample.q);
+        lines.push(sample.t.toFixed(6) + "," + angles[0].toFixed(4) + "," + angles[1].toFixed(4) + "," + angles[2].toFixed(4));
+      });
+      const blob = new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "imu_orientation.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    fileInput.addEventListener("change", function () {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function () {
+        try {
+          onCsvLoaded(String(reader.result || ""), file.name);
+          fileInput.value = "";
+        } catch (error) {
+          pause();
+          setMessage(error.message || "อ่านไฟล์ CSV ไม่สำเร็จ", true);
+        }
+      };
+      reader.onerror = function () { setMessage("อ่านไฟล์ไม่สำเร็จ", true); };
+      reader.readAsText(file);
+    });
+
+    sensorSelect.addEventListener("change", function () {
+      if (!cachedCsv) return;
+      activeSensor = sensorSelect.value;
+      try { buildRawForSelection(cachedCsv.rows, cachedCsv.headers, cachedName); }
+      catch (error) { setMessage(error.message || "เลือกเซนเซอร์นี้ไม่ได้", true); }
+    });
+
+    unitSelect.addEventListener("change", function () {
+      if (cachedCsv && cachedName && !findEulerColumns(cachedCsv.headers) && !findQuaternionColumns(cachedCsv.headers)) {
+        try { buildRawForSelection(cachedCsv.rows, cachedCsv.headers, cachedName); }
+        catch (error) { setMessage(error.message || "ปรับหน่วยไจโรไม่ได้", true); }
+      }
+    });
+    demoButton.addEventListener("click", makeDemo);
+    playButton.addEventListener("click", function () { if (playing) pause(); else play(); });
+    exportButton.addEventListener("click", exportAngles);
+    timeline.addEventListener("input", function () {
+      if (!samples.length) return;
+      pause();
+      currentIndex = Number(timeline.value);
+      updateReadouts(frameAt(currentIndex));
+    });
+    speedSelect.addEventListener("change", function () { if (playing) lastTick = 0; });
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.round(rect.width * ratio));
+      const height = Math.max(1, Math.round(rect.height * ratio));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+        if (samples.length) updateReadouts(frameAt(currentIndex));
+        else drawScene([1, 0, 0, 0]);
+      }
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    drawScene([1, 0, 0, 0]);
+  </script>
+</body>
+</html>

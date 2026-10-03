@@ -1,31 +1,23 @@
 # PlanKO: one IMU per body point
 
-Each Nano 33 BLE board measures one body point. Flash the environment that matches
-the physical board: `nano33ble` for the first generation or `nano33ble_rev2` for
-Rev2. Set `SENSOR_POINT` in `platformio.ini` to one of `chest`, `lumbar`,
+Each board measures one body point using an ESP32-C3 with an MPU-6050 sensor.
+Set `SENSOR_POINT` in `platformio.ini` to one of `chest`, `lumbar`,
 `pelvis`, `neck`, `head`, `left_upper_arm`, `right_upper_arm`, `left_forearm`,
 `right_forearm`, `left_thigh`, `right_thigh`, `left_shin`, or `right_shin` before
 flashing each board. Each board must have a unique point name.
 
-The default Upload action uses `nano33ble` (first generation) only. To upload
-explicitly, use:
+To build and upload to ESP32-C3:
 
 ```powershell
-pio run -e nano33ble -t upload
+pio run -t upload
 ```
 
-Only use `-e nano33ble_rev2` for a board marked Rev2. If the upload loses the
-COM port after its 1200 bps reset, close Serial Monitor and capture.py, then
-double-press RESET to enter bootloader mode (the status LED should pulse).
-Run `pio device list` and note the port shown while the board is in bootloader
-mode. Retry with that port explicitly:
+Or specify the upload port explicitly:
 
 ```powershell
-pio run -e nano33ble -t upload --upload-port COM7
+pio run -t upload --upload-port COM8
 ```
 
-Replace `COM7` with the port listed on your computer. The bootloader can appear
-as a different COM port from the normal sketch.
 
 The firmware sends CSV through USB serial at 115200 baud. It samples whenever
 both acceleration and gyro data are ready, calibrates gyro bias while the board
