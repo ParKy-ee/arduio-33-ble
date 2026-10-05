@@ -107,6 +107,20 @@
     .message { min-height: 17px; margin: 10px 3px 0; color: var(--muted); font-size: 11px; }
     .message.error { color: #ff9292; }
     .bottom-note { margin: 13px 3px 0; color: #728696; font-size: 10px; line-height: 1.6; }
+    .record-card { margin-top: 14px; padding: 15px; background: rgba(17, 27, 37, .94); border: 1px solid var(--line); border-radius: 13px; }
+    .record-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .record-head strong { display: block; font-size: 14px; }
+    .record-head small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .record-status { flex: 0 0 auto; padding: 5px 10px; border-radius: 999px; background: #253440; color: #c5d1d8; font-size: 11px; font-weight: 700; }
+    .record-status.recording { background: rgba(255, 119, 119, .16); color: #ff9292; }
+    .record-status.done { background: rgba(116, 240, 194, .13); color: var(--mint); }
+    .record-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 9px; }
+    .record-field { display: grid; gap: 5px; min-width: 155px; color: var(--muted); font-size: 11px; }
+    .record-field select, .record-field input { width: 100%; min-height: 39px; padding: 0 10px; color: var(--text); background: #0d151e; border: 1px solid var(--line); border-radius: 9px; }
+    .record-count { align-self: center; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .record-feedback { min-height: 16px; margin-top: 9px; color: var(--muted); font-size: 11px; }
+    .recording-list { display: grid; gap: 6px; margin-top: 9px; }
+    .recording-link { color: var(--mint); font-size: 11px; overflow-wrap: anywhere; }
     @media (max-width: 900px) {
       .stage-grid { grid-template-columns: 1fr; }
       .side-card { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; }
@@ -129,6 +143,7 @@
       .side-card > .divider { display: block; }
       .timeline-row { grid-template-columns: 38px minmax(0, 1fr) 82px; gap: 8px; }
       .transport-meta { margin-left: 46px; }
+      .record-field { flex: 1 1 45%; }
     }
   </style>
 </head>
@@ -172,6 +187,39 @@
           <option value="4">4×</option>
         </select>
       </label>
+    </section>
+
+    <section class="record-card" aria-labelledby="recordTitle">
+      <div class="record-head">
+        <div>
+          <strong id="recordTitle">Record IMU data</strong>
+          <small>One CSV per recording. Sensor location is a manual label; move the IMU before selecting another site.</small>
+        </div>
+        <span id="recordStatus" class="record-status">Ready</span>
+      </div>
+      <div class="record-controls">
+        <label class="record-field">Sensor location
+          <select id="recordLocation">
+            <option value="wrist">Wrist / hand</option>
+            <option value="neck">Neck</option>
+            <option value="occiput">Back of head</option>
+            <option value="chest">Chest</option>
+            <option value="t3">Upper back (T3)</option>
+            <option value="lumbar">Lower back</option>
+            <option value="sacrum">Pelvis / sacrum</option>
+            <option value="right_forearm">Right forearm</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label class="record-field">Trial label
+          <input id="recordLabel" type="text" value="PC" maxlength="40" placeholder="PC, HTFN, wrist_flexion...">
+        </label>
+        <button id="recordStart" class="tool-button primary" type="button">Record</button>
+        <button id="recordStop" class="tool-button" type="button" disabled>Stop / Done</button>
+        <span id="recordCount" class="record-count">0 samples</span>
+      </div>
+      <div id="recordFeedback" class="record-feedback" role="status">Open this page from the ESP32 Wi-Fi to record live data.</div>
+      <div id="recordingsList" class="recording-list" aria-live="polite"></div>
     </section>
 
     <section class="stage-grid">
@@ -268,6 +316,14 @@
     const liveStatus = $("liveStatus");
     const sourceLabel = $("sourceLabel");
     const filterNote = $("filterNote");
+    const recordLocation = $("recordLocation");
+    const recordLabel = $("recordLabel");
+    const recordStartButton = $("recordStart");
+    const recordStopButton = $("recordStop");
+    const recordStatus = $("recordStatus");
+    const recordCount = $("recordCount");
+    const recordFeedback = $("recordFeedback");
+    const recordingsList = $("recordingsList");
     const DEG = Math.PI / 180;
     let samples = [];
     let currentIndex = 0;
@@ -282,11 +338,131 @@
     let sourceName = "";
     let cachedCsv = null;
     let cachedName = "";
+    let activeRecording = null;
+    let recordingNumber = 0;
+    const recordingUrls = [];
 
     function setMessage(text, isError) {
       message.textContent = text || "";
       message.className = isError ? "message error" : "message";
     }
+
+    function setRecordStatus(text, state) {
+      recordStatus.textContent = text;
+      recordStatus.className = "record-status" + (state ? " " + state : "");
+    }
+
+    function csvCell(value) {
+      const text = value === null || value === undefined ? "" : String(value);
+      return /[\",\r\n]/.test(text) ? "\"" + text.replace(/\"/g, "\"\"") + "\"" : text;
+    }
+
+    function startRecording() {
+      const label = recordLabel.value.trim();
+      if (!label) {
+        recordFeedback.textContent = "Enter a trial label before recording.";
+        return;
+      }
+      recordingNumber += 1;
+      const startedAt = new Date();
+      const stamp = startedAt.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+      activeRecording = {
+        id: stamp + "_" + String(recordingNumber).padStart(3, "0"),
+        startedAt: startedAt,
+        site: recordLocation.value,
+        label: label,
+        rows: [],
+        lastSampleKey: ""
+      };
+      recordLocation.disabled = true;
+      recordLabel.disabled = true;
+      recordStartButton.disabled = true;
+      recordStopButton.disabled = false;
+      recordCount.textContent = "0 samples";
+      recordFeedback.textContent = "Recording live ESP32 samples. Keep this page open.";
+      setRecordStatus("Recording", "recording");
+    }
+
+    function captureLiveSample(data) {
+      if (!activeRecording || !data || data.valid !== true) return;
+      const sampleKey = String(data.sample_ms) + ":" + String(data.seq);
+      if (sampleKey === activeRecording.lastSampleKey) return;
+      activeRecording.lastSampleKey = sampleKey;
+
+      const hostTimeMs = Date.now();
+      const gravity = 9.80665;
+      activeRecording.rows.push({
+        sensor_id: activeRecording.site,
+        recorded_site: activeRecording.site,
+        trial_label: activeRecording.label,
+        recording_id: activeRecording.id,
+        host_time_iso: new Date(hostTimeMs).toISOString(),
+        host_time_s: (hostTimeMs / 1000).toFixed(6),
+        boot_ms: data.sample_ms,
+        seq: data.seq,
+        accel_x: Number(data.ax) * gravity,
+        accel_y: Number(data.ay) * gravity,
+        accel_z: Number(data.az) * gravity,
+        gyro_x: data.gx,
+        gyro_y: data.gy,
+        gyro_z: data.gz,
+        tilt_deg: data.tilt_deg,
+        neutral_tilt_deg: data.neutral_tilt_deg,
+        relative_tilt_deg: data.wrist_flex_deg,
+        accel_norm_g: data.accel_norm_g,
+        gyro_norm_dps: data.gyro_norm_dps,
+        steady: data.steady,
+        calibrated: data.calibrated,
+        valid: data.valid,
+        firmware_sensor_id: data.sensor_id,
+        firmware_status: data.status
+      });
+      recordCount.textContent = activeRecording.rows.length.toLocaleString() + " samples";
+    }
+
+    function finishRecording() {
+      if (!activeRecording) return;
+      const completed = activeRecording;
+      activeRecording = null;
+      recordLocation.disabled = false;
+      recordLabel.disabled = false;
+      recordStartButton.disabled = false;
+      recordStartButton.textContent = "Record another";
+      recordStopButton.disabled = true;
+
+      const count = completed.rows.length;
+      setRecordStatus("Done", "done");
+      recordFeedback.textContent = count
+        ? "Saved " + count.toLocaleString() + " samples. Use the link below to download this CSV."
+        : "No live samples received. Open this page at the ESP32 address while connected to ESP32-IMU.";
+      if (!count) return;
+
+      const columns = [
+        "sensor_id", "recorded_site", "trial_label", "recording_id", "host_time_iso",
+        "host_time_s", "boot_ms", "seq", "accel_x", "accel_y", "accel_z",
+        "gyro_x", "gyro_y", "gyro_z", "tilt_deg", "neutral_tilt_deg",
+        "relative_tilt_deg", "accel_norm_g", "gyro_norm_dps", "steady", "calibrated",
+        "valid", "firmware_sensor_id", "firmware_status"
+      ];
+      const lines = [columns.join(",")];
+      completed.rows.forEach(function (row) {
+        lines.push(columns.map(function (column) { return csvCell(row[column]); }).join(","));
+      });
+      const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      recordingUrls.push(url);
+      const site = completed.site.replace(/[^a-z0-9_-]+/gi, "_");
+      const label = completed.label.replace(/[^a-z0-9_-]+/gi, "_");
+      const filename = completed.id + "_" + site + "_" + label + ".csv";
+      const link = document.createElement("a");
+      link.className = "recording-link";
+      link.href = url;
+      link.download = filename;
+      link.textContent = filename + " (" + count.toLocaleString() + " samples) - Download";
+      recordingsList.prepend(link);
+    }
+
+    window.captureLiveSample = captureLiveSample;
 
     function clamp(value, low, high) {
       return Math.max(low, Math.min(high, value));
@@ -989,6 +1165,11 @@
       }
     });
     demoButton.addEventListener("click", makeDemo);
+    recordStartButton.addEventListener("click", startRecording);
+    recordStopButton.addEventListener("click", finishRecording);
+    window.addEventListener("pagehide", function () {
+      recordingUrls.forEach(function (url) { URL.revokeObjectURL(url); });
+    });
     playButton.addEventListener("click", function () { if (playing) pause(); else play(); });
     exportButton.addEventListener("click", exportAngles);
     timeline.addEventListener("input", function () {

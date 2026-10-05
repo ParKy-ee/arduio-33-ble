@@ -20,7 +20,7 @@ FIELDS = [
 POINTS = {
     "chest", "lumbar", "pelvis", "neck", "head",
     "left_upper_arm", "right_upper_arm", "left_forearm", "right_forearm",
-    "left_thigh", "right_thigh", "left_shin", "right_shin",
+    "left_thigh", "right_thigh", "left_shin", "right_shin", "wrist",
 }
 
 

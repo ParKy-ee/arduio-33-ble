@@ -18,6 +18,7 @@ html = html.replace('</head>', css_hide)
 live_script = '''
     // --- LIVE ESP32 INJECTION ---
     let liveInterval = 0;
+    let liveBusy = false;
     let liveQ = [1,0,0,0];
     let lastTime = 0;
     
@@ -28,10 +29,13 @@ live_script = '''
         setMessage("กำลังเชื่อมต่อ...");
         
         liveInterval = setInterval(async () => {
+            if (liveBusy) return;
+            liveBusy = true;
             try {
                 // เพิ่ม ?_t=... ป้องกัน Browser Cache ค่าเดิม
                 let res = await fetch('/data?_t=' + Date.now());
                 let data = await res.json();
+                if (typeof window.captureLiveSample === 'function') window.captureLiveSample(data);
                 
                 let accel = [data.ax, data.ay, data.az];
                 let gyro = [data.gx, data.gy, data.gz];
@@ -86,8 +90,10 @@ live_script = '''
                 liveStatus.textContent = "Live";
             } catch(e) {
                 setMessage("ขาดการเชื่อมต่อ: " + e.message, true);
+            } finally {
+                liveBusy = false;
             }
-        }, 80);
+        }, 50);
     }
     
     window.addEventListener('load', startLive);
@@ -104,5 +110,5 @@ const uint8_t webpage_html_gz[] PROGMEM = {{ {array_str} }};
 const size_t webpage_html_gz_len = {len(compressed)};
 '''
 
-with open('src/webpage.h', 'w', encoding='utf-8') as f:
+with open('src/webpage.h', 'w', encoding='utf-8', newline='\n') as f:
     f.write(out)
