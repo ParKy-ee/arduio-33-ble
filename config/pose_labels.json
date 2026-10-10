@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "sampling_hz": 20,
+  "window_seconds": [
+    0.5,
+    1.0
+  ],
+  "phases": [
+    "neutral",
+    "approaching",
+    "holding",
+    "returning"
+  ],
+  "mount_sites": {
+    "wrist": {
+      "label": "หลังมือ/ข้อมือ",
+      "body_axis_profile": "wrist_back_of_hand"
+    },
+    "right_forearm": {
+      "label": "ท่อนแขนขวา",
+      "body_axis_profile": "right_forearm"
+    },
+    "left_forearm": {
+      "label": "ท่อนแขนซ้าย",
+      "body_axis_profile": "left_forearm"
+    },
+    "right_upper_arm": {
+      "label": "ต้นแขนขวา",
+      "body_axis_profile": "right_upper_arm"
+    },
+    "left_upper_arm": {
+      "label": "ต้นแขนซ้าย",
+      "body_axis_profile": "left_upper_arm"
+    },
+    "chest": {
+      "label": "หน้าอก",
+      "body_axis_profile": "chest"
+    },
+    "neck": {
+      "label": "?????",
+      "body_axis_profile": "neck"
+    },
+    "head": {
+      "label": "ศีรษะ",
+      "body_axis_profile": "head"
+    },
+    "lumbar": {
+      "label": "???????????????",
+      "body_axis_profile": "lumbar"
+    },
+    "pelvis": {
+      "label": "????????/?????",
+      "body_axis_profile": "pelvis"
+    },
+    "left_thigh": {
+      "label": "ต้นขาซ้าย",
+      "body_axis_profile": "left_thigh"
+    },
+    "right_thigh": {
+      "label": "ต้นขาขวา",
+      "body_axis_profile": "right_thigh"
+    },
+    "left_shin": {
+      "label": "หน้าแข้งซ้าย",
+      "body_axis_profile": "left_shin"
+    },
+    "right_shin": {
+      "label": "หน้าแข้งขวา",
+      "body_axis_profile": "right_shin"
+    },
+    "shoulder": {
+      "label": "หัวไหล่",
+      "body_axis_profile": "shoulder"
+    },
+    "elbow": {
+      "label": "ข้อศอก",
+      "body_axis_profile": "elbow"
+    },
+    "other": {
+      "label": "อื่น ๆ",
+      "body_axis_profile": "manual"
+    }
+  },
+  "body_parts": {
+    "wrist": {
+      "label": "ข้อมือ",
+      "actions": [
+        {
+          "id": "wrist_up",
+          "label": "งัดขึ้น",
+          "legacy_files": [
+            "up.csv"
+          ]
+        },
+        {
+          "id": "wrist_down",
+          "label": "งัดลง",
+          "legacy_files": [
+            "down.csv"
+          ]
+        },
+        {
+          "id": "wrist_neutral",
+          "label": "วางปกติ",
+          "legacy_files": [
+            "nomal.csv",
+            "normal.csv"
+          ]
+        }
+      ]
+    },
+    "elbow": {
+      "label": "ข้อศอก",
+      "actions": [
+        {
+          "id": "elbow_raise_arm",
+          "label": "ยกแขน",
+          "legacy_files": []
+        },
+        {
+          "id": "elbow_release_arm",
+          "label": "ปล่อยแขน",
+          "legacy_files": []
+        }
+      ]
+    },
+    "shoulder": {
+      "label": "หัวไหล่",
+      "actions": []
+    },
+    "neck": {
+      "label": "?????",
+      "actions": [
+        {
+          "id": "neck_neutral",
+          "label": "?????",
+          "legacy_files": []
+        },
+        {
+          "id": "neck_flexion",
+          "label": "?????",
+          "legacy_files": []
+        },
+        {
+          "id": "neck_extension",
+          "label": "?????",
+          "legacy_files": []
+        },
+        {
+          "id": "neck_lateral_flexion_left",
+          "label": "???????????",
+          "legacy_files": []
+        },
+        {
+          "id": "neck_lateral_flexion_right",
+          "label": "??????????",
+          "legacy_files": []
+        }
+      ]
+    },
+    "lumbar": {
+      "label": "???????????????",
+      "actions": [
+        {
+          "id": "lumbar_neutral",
+          "label": "???????",
+          "legacy_files": []
+        },
+        {
+          "id": "lumbar_flexion",
+          "label": "????????",
+          "legacy_files": []
+        },
+        {
+          "id": "lumbar_extension",
+          "label": "????????",
+          "legacy_files": []
+        },
+        {
+          "id": "lumbar_lateral_flexion_left",
+          "label": "??????????????",
+          "legacy_files": []
+        },
+        {
+          "id": "lumbar_lateral_flexion_right",
+          "label": "?????????????",
+          "legacy_files": []
+        }
+      ]
+    },
+    "pelvis": {
+      "label": "???????? (???????????)",
+      "actions": [
+        {
+          "id": "pelvis_neutral",
+          "label": "????????????",
+          "legacy_files": []
+        },
+        {
+          "id": "pelvis_anterior_tilt",
+          "label": "???????????????????",
+          "legacy_files": []
+        },
+        {
+          "id": "pelvis_posterior_tilt",
+          "label": "???????????????????",
+          "legacy_files": []
+        },
+        {
+          "id": "pelvis_lateral_tilt_left",
+          "label": "?????????????????",
+          "legacy_files": []
+        },
+        {
+          "id": "pelvis_lateral_tilt_right",
+          "label": "????????????????",
+          "legacy_files": []
+        }
+      ]
+    }
+  },
+  "prediction": {
+    "minimum_action_score": 0.55,
+    "minimum_phase_score": 0.55,
+    "smoothing_windows": 3,
+    "holding_stable_seconds": 0.5,
+    "gap_reset_seconds": 0.15
+  }
+}

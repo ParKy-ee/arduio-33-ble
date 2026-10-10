@@ -55,6 +55,13 @@
     .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
     .live-chip { display: inline-flex; align-items: center; gap: 8px; color: #b9c9d3; font-size: 12px; white-space: nowrap; }
     .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px rgba(116, 240, 194, .65); }
+    .quick-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: -7px 0 17px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(17,27,37,.78); }
+    .quick-nav a, .quick-nav button { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); background: #213846; text-decoration: none; font: inherit; font-size: 13px; cursor: pointer; }
+    .quick-nav a:hover, .quick-nav button:hover { border-color: var(--mint); }
+    .quick-nav .quick-link-primary { color: #061711; background: var(--mint); border-color: var(--mint); font-weight: 750; }
+    .model-server-field { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+    .model-server-field input { width: min(260px, 38vw); min-height: 36px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); background: #0d151e; }
+    .quick-nav-hint { margin-left: auto; color: var(--muted); font-size: 11px; }
     .toolbar {
       display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
       padding: 13px; background: rgba(17, 27, 37, .88); border: 1px solid var(--line); border-radius: 13px;
@@ -132,6 +139,10 @@
       .shell { width: calc(100% - 22px); padding-top: 18px; }
       .topline { align-items: flex-start; }
       .live-chip { display: none; }
+      .quick-nav { align-items: stretch; }
+      .model-server-field { flex: 1 1 100%; }
+      .model-server-field input { flex: 1; width: auto; min-width: 0; }
+      .quick-nav-hint { flex: 1 1 100%; margin-left: 0; }
       .toolbar { gap: 8px; }
       .toolbar-spacer { display: none; }
       .field { flex: 1 1 44%; justify-content: space-between; }
@@ -159,6 +170,15 @@
       </div>
       <div class="live-chip"><i class="live-dot"></i><span id="liveStatus">พร้อมจำลอง</span></div>
     </header>
+
+    <nav class="quick-nav" aria-label="เมนู IMU">
+      <a href="/calibrate">ตั้งท่ากลาง / Calibrate</a>
+      <label class="model-server-field" for="modelTestServer">ที่อยู่ Model Test
+        <input id="modelTestServer" type="url" value="http://127.0.0.1:8765/" placeholder="http://127.0.0.1:8765/" autocomplete="url">
+      </label>
+      <button id="openModelTest" class="quick-link-primary" type="button">เปิด Model Test</button>
+      <span class="quick-nav-hint">เปิด Python server บน PC ก่อน · ค่าเริ่มต้นใช้ PC เครื่องนี้</span>
+    </nav>
 
     <section class="toolbar" aria-label="ตัวเลือกไฟล์และเซนเซอร์">
       <label class="file-wrap">

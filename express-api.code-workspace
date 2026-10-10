@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../../xampp/htdocs/express-api"
+		},
+		{
+			"path": "../../../../../../xampp/htdocs/leonics-moc.www"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"prisma-smart-formatter.typescript.defaultFormatter": "esbenp.prettier-vscode",
+		"prisma-smart-formatter.prisma.defaultFormatter": "Prisma.prisma"
+	}
+}

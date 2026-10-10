@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ทดสอบ IMU Pose Model</title>
+  <style>
+    :root{color-scheme:dark;--bg:#101820;--panel:#182631;--line:#2d4350;--muted:#9eb0bb;--text:#edf5f8;--mint:#74f0c2;--blue:#8dbbff;--red:#ff9292}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,"Segoe UI",sans-serif}
+    main{max-width:1100px;margin:0 auto;padding:24px}h1{font-size:25px;margin:0}h2{font-size:16px;margin:0 0 12px}.muted{color:var(--muted);font-size:13px}
+    .top,.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.field{display:grid;gap:5px;color:var(--muted);font-size:12px}
+    input,select,button{min-height:40px;border:1px solid var(--line);border-radius:8px;background:#0d151e;color:var(--text);padding:8px 10px;font:inherit}button{cursor:pointer;background:#213846}button.primary{background:#225a50;border-color:#347d70}button:disabled{opacity:.5;cursor:default}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.status{padding:4px 10px;border-radius:99px;background:#20323d;color:var(--blue);font-size:12px;white-space:nowrap}
+    .prediction{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}.metric{padding:12px;border:1px solid var(--line);border-radius:10px;background:#101b23}.metric small{display:block;color:var(--muted);font-size:11px}.metric strong{display:block;font-size:17px;margin-top:4px;overflow-wrap:anywhere}
+    input[type=range]{width:100%;padding:0}.note{font-size:12px;color:var(--muted);margin:8px 0 0}.error{color:var(--red)}.ok{color:var(--mint)}
+    #log{width:100%;min-height:120px;font:12px ui-monospace,monospace}.hidden{display:none}
+    @media(max-width:600px){main{padding:12px}.top{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+<main>
+  <header class="top"><div><h1>ทดสอบ IMU Pose Model</h1><div id="healthText" class="muted">กำลังโหลด model metadata…</div></div><span id="modeStatus" class="status">หยุด</span></header>
+
+  <section class="panel">
+    <h2>แหล่งข้อมูลและตำแหน่ง</h2>
+    <div class="grid">
+      <label class="field">โหมดข้อมูล<select id="sourceMode"><option value="csv">CSV replay</option><option value="live">Live จาก ESP</option></select></label>
+      <label class="field">IP ของ ESP<input id="espIp" value="192.168.4.1" inputmode="decimal"></label>
+      <label class="field">ตำแหน่งติด IMU<select id="site"></select></label>
+      <label class="field">ส่วนร่างกาย<select id="bodyPart"></select></label>
+      <label class="field">ข้าง<select id="side"><option value="right">ขวา</option><option value="left">ซ้าย</option><option value="unknown">ไม่ระบุ</option></select></label>
+      <label class="field" id="csvField">ไฟล์ข้อมูล<input id="csvFile" type="file" accept=".csv,text/csv"></label>
+    </div>
+    <div class="actions"><button id="connect" class="primary">เริ่ม Live</button><button id="loadCsv">โหลด CSV</button><button id="play" disabled>เล่น</button><button id="pause" disabled>พัก</button><button id="downloadLog">ดาวน์โหลด prediction log</button></div>
+    <p id="sourceNote" class="note">หน้าเว็บนี้ใช้ model บน PC; สถานะ threshold จาก firmware แสดงแยกจากผล ML</p>
+  </section>
+
+  <section class="panel"><h2>Prediction</h2><div class="prediction">
+    <div class="metric"><small>ตำแหน่งร่างกาย</small><strong id="outBody">—</strong></div>
+    <div class="metric"><small>ท่า</small><strong id="outAction">—</strong></div>
+    <div class="metric"><small>ระยะ</small><strong id="outStage">unknown</strong></div>
+    <div class="metric"><small>คะแนนโมเดล</small><strong id="outScore">—</strong></div>
+    <div class="metric"><small>เวลาค้าง</small><strong id="outHeld">0 ms</strong></div>
+    <div class="metric"><small>Calibration / model</small><strong id="outCal">—</strong></div>
+  </div><p id="reason" class="note">ยังไม่มีข้อมูล</p><p id="firmwareStatus" class="note">Firmware: —</p></section>
+
+  <section id="csvPanel" class="panel"><h2>เล่นข้อมูลตามเวลา</h2><input id="timeline" type="range" min="0" max="0" value="0" disabled><p id="csvInfo" class="note">เลือก CSV ที่เก็บจากหน้า recorder หรือ tools/capture.py</p></section>
+  <section class="panel"><h2>Prediction log</h2><textarea id="log" readonly></textarea></section>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);let metadata=null, csvRows=[], timer=0, cursor=0, liveTimer=0, logRows=[], replayBusy=false;
+function setStatus(text){$("modeStatus").textContent=text;}
+function showPrediction(p){
+  const actionEntry=metadata?.body_part_config?.[p.body_part]?.actions?.find(action=>action.id===p.action);
+  $("outBody").textContent=p.body_part||"unknown";$("outAction").textContent=actionEntry?`${actionEntry.label} (${p.action})`:p.action||"unknown";
+  $("outStage").textContent=p.stage||"unknown";$("outScore").textContent=p.score==null?"—":`${p.score} (${p.score_kind||"model score"})`;
+  $("outHeld").textContent=(p.held_ms||0)+" ms";$("outCal").textContent=(p.calibrated?"ready":"not ready")+" / cal "+(p.calibration_id||"?")+" / method "+(p.calibration_method_version||"?")+" / uptime "+(p.calibration_time_boot_ms||"?")+" @ "+(p.calibration_boot_id||"?")+" / "+(p.model_version||"?");
+  $("reason").textContent=p.reason||"";$("firmwareStatus").textContent=p.firmware_status?`Firmware status (แยกจาก ML): ${p.firmware_status}`:"Firmware status: —";
+  if(!p.duplicate_sample)logRows.push({time:new Date().toISOString(),...p});$("log").value=JSON.stringify(logRows.slice(-100),null,2);
+}
+function parseCsv(text){
+  const rows=[];let row=[],cell="",quoted=false;
+  for(let i=0;i<text.length;i++){const c=text[i];if(quoted){if(c==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(c==='"')quoted=false;else cell+=c;}else if(c==='"')quoted=true;else if(c===','){row.push(cell);cell="";}else if(c==='\n'){row.push(cell.replace(/\r$/,''));rows.push(row);row=[];cell="";}else cell+=c;}
+  if(cell.length||row.length){row.push(cell);rows.push(row);}if(rows.length<2)return[];const headers=rows.shift().map(h=>h.trim());
+  return rows.filter(r=>r.length===headers.length).map(r=>Object.fromEntries(headers.map((h,i)=>[h,r[i]])));
+}
+function toModelRow(r,index){
+  const boot=Number(r.boot_ms||r.sample_ms);const host=Number(r.host_time_s||r.host_timestamp_s);
+  const t=Number.isFinite(boot)&&boot>0?boot/1000:Number.isFinite(host)?host:index*1/(metadata?.sampling_hz||20);
+  const accelerationUnit=String(r.unit_accel||r.accel_unit||"").toLowerCase();const accelScale=accelerationUnit==="g"||accelerationUnit.includes("(g)")?9.80665:1;
+  const a=(k,legacy)=>{const value=r[k]??r[legacy];return value===""||value==null?Number.NaN:Number(value);};
+  const calibrated=[true,"true","1",1].includes(r.calibrated);
+  const recordedSide=String(r.side||"").trim().toLowerCase();
+  const selectedSide=$("side").value;
+  return {sensor_uid:r.sensor_uid||r.firmware_sensor_id||r.sensor_id||"csv",mount_site:r.mount_site||r.recorded_site||r.sensor_id||$("site").value,body_part:r.body_part||$("bodyPart").value,side:(!recordedSide||recordedSide==="unknown")?selectedSide:recordedSide,seq:r.seq==null||r.seq===""?index:Number(r.seq),device_time_s:t,host_time_s:Number.isFinite(host)?host:t,boot_ms:boot||Math.round(t*1000),stream_epoch:r.stream_epoch||0,calibration_id:r.calibration_id||"",calibration_method_version:Number(r.calibration_method_version||0),calibration_time_boot_ms:Number(r.calibration_time_boot_ms||0),calibration_boot_id:Number(r.calibration_boot_id||0),calibrated,relative_angle_valid:[true,"true","1",1].includes(r.relative_angle_valid),relative_orientation_valid:r.relative_orientation_valid==null||r.relative_orientation_valid===""?calibrated:[true,"true","1",1].includes(r.relative_orientation_valid),relative_roll_deg:Number(r.relative_roll_deg||0),relative_pitch_deg:Number(r.relative_pitch_deg??r.relative_tilt_deg??0),valid:![false,"false","0",0].includes(r.valid),accel_x:a("accel_x","ax")*accelScale,accel_y:a("accel_y","ay")*accelScale,accel_z:a("accel_z","az")*accelScale,gyro_x:a("gyro_x","gx"),gyro_y:a("gyro_y","gy"),gyro_z:a("gyro_z","gz")};
+}
+async function predictWindow(rows,context={}){const response=await fetch("/api/predict-window",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({rows,mount_site:context.mount_site||$("site").value,body_part:context.body_part||$("bodyPart").value,stream_key:context.stream_key,stream_context:context.stream_context,device_time_s:context.device_time_s,seq:context.seq})});showPrediction(await response.json());}
+async function replayAt(index){if(!csvRows.length)return;const now=csvRows[index].device_time_s,window=metadata?.window_seconds||1;let first=index;while(first>0&&now-csvRows[first-1].device_time_s<window)first--;const samples=csvRows.slice(first,index+1);$("timeline").value=index;$("csvInfo").textContent=`แถว ${index+1}/${csvRows.length} · ${now.toFixed(2)} s · ${samples.length} samples`;if(samples.length>2)await predictWindow(samples);else showPrediction({body_part:$("bodyPart").value,action:"unknown",stage:"unknown",reason:"warming_up",calibrated:false});}
+async function loadMetadata(){try{const r=await fetch("/api/health");metadata=await r.json();if(!r.ok)throw Error(metadata.reason);$("healthText").textContent=`Model ${metadata.model_version} · ${metadata.action_labels.length} action classes · phase ${metadata.phase_available?metadata.phase_labels.join(", "):"ยังไม่มี label จึงเป็น unknown"}`;$("site").innerHTML=metadata.mount_sites.map(s=>`<option value="${s}">${s}</option>`).join("");$("bodyPart").innerHTML=metadata.body_parts.map(s=>`<option value="${s}">${metadata.body_part_config[s]?.label||s}</option>`).join("");$("side").value=metadata.sides.includes("unknown")?"unknown":metadata.sides[0]||"unknown";}catch(e){$("healthText").textContent=`Model ยังไม่พร้อม: ${e.message}`;setStatus("ไม่มี model");}}
+$("sourceMode").addEventListener("change",()=>{const live=$("sourceMode").value==="live";$("csvField").classList.toggle("hidden",live);$("csvPanel").classList.toggle("hidden",live);$("connect").textContent=live?"เริ่ม Live":"หยุด Live";});
+$("bodyPart").addEventListener("change",()=>{if(metadata){const body=metadata.body_part_config[$("bodyPart").value];if(body?.actions?.length)$("sourceNote").textContent=`ท่าที่กำหนด: ${body.actions.map(a=>a.label).join(" / ")}`;}});
+$("connect").addEventListener("click",()=>{if(liveTimer){clearInterval(liveTimer);liveTimer=0;setStatus("หยุด");return;}if($("sourceMode").value!=="live"){setStatus("เลือก live mode ก่อน");return;}let livePullBusy=false;const pull=async()=>{if(livePullBusy)return;livePullBusy=true;try{const q=new URLSearchParams({ip:$ ("espIp").value.trim(),mount_site:$ ("site").value,body_part:$ ("bodyPart").value,side:$ ("side").value});const r=await fetch(`/api/live?${q}`);showPrediction(await r.json());setStatus(r.ok?"Live":"อ่าน ESP ไม่สำเร็จ");}catch(e){setStatus(e.message);}finally{livePullBusy=false;}};pull();liveTimer=setInterval(pull,100);});
+$("loadCsv").addEventListener("click",async()=>{
+  const file=$("csvFile").files[0];
+  if(!file||!metadata)return;
+  const raw=parseCsv(await file.text());
+  const legacyAction=metadata.legacy_file_actions?.[file.name.toLowerCase()]||"";
+  const mappedBody=legacyAction?Object.entries(metadata.body_part_config).find(([,body])=>body.actions?.some(action=>action.id===legacyAction))?.[0]:"";
+  csvRows=raw.map((source,index)=>{
+    const row=toModelRow(source,index);
+    return Object.assign(row,{
+      body_part:source.body_part||(mappedBody||row.body_part),
+      action_label:source.action_label||source.pose_label||legacyAction,
+      phase_label:source.phase_label||"",
+      calibration_method_version:Number(source.calibration_method_version||0),
+      calibration_time_boot_ms:Number(source.calibration_time_boot_ms||0),
+      calibration_boot_id:Number(source.calibration_boot_id||0),
+      trial_id:source.trial_id||source.recording_id||file.name,
+      session_id:source.session_id||"",
+      subject_id:source.subject_id||""
+    });
+  });
+  let epoch=0,previous=null;
+  for(const row of csvRows){
+    const reboot=previous&&(row.seq<=previous.seq||row.device_time_s<=previous.device_time_s);
+    const calibrationChanged=previous&&row.calibration_id!==previous.calibration_id;
+    if(reboot||calibrationChanged)epoch++;
+    row.stream_epoch=epoch;
+    row.gap_before=!!(previous&&row.seq!==previous.seq+1);
+    previous=row;
+  }
+  if(csvRows.length){
+    for(const [select,value] of [[$("site"),csvRows[0].mount_site],[$("bodyPart"),csvRows[0].body_part]]){
+      if(value&&!Array.from(select.options).some(option=>option.value===value)){
+        const option=document.createElement("option");option.value=value;option.textContent=value+" (not seen in training)";select.appendChild(option);
+      }
+      if(value)select.value=value;
+    }
+  }
+  cursor=0;$("timeline").max=Math.max(0,csvRows.length-1);$("timeline").value=0;
+  $("timeline").disabled=!csvRows.length;$("play").disabled=!csvRows.length;
+  $("csvInfo").textContent=file.name+": "+csvRows.length+" samples; trials "+new Set(csvRows.map(row=>row.trial_id)).size;
+  if(csvRows.length)await replayAt(0);
+  setStatus("CSV loaded");
+});
+$("timeline").addEventListener("input",()=>replayAt(Number($("timeline").value)));
+$("play").addEventListener("click",()=>{
+  if(timer||!csvRows.length)return;
+  const interval=Math.max(20,Math.floor(1000/(metadata?.sampling_hz||20)));
+  timer=setInterval(async()=>{
+    if(replayBusy)return;
+    if(cursor>=csvRows.length-1){clearInterval(timer);timer=0;setStatus("Playback complete");return;}
+    cursor++;$("timeline").value=cursor;replayBusy=true;
+    try{await replayAt(cursor);}finally{replayBusy=false;}
+  },interval);
+  setStatus("Playing CSV");
+});
+$("pause").addEventListener("click",()=>{clearInterval(timer);timer=0;setStatus("CSV paused");});
+$("downloadLog").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(logRows,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="imu_prediction_log.json";a.click();URL.revokeObjectURL(a.href);});
+let replayTruth = {action:"",phase:""};
+const replayStreamKey = `csv-replay-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
+const baseShowPrediction = showPrediction;
+showPrediction = function (prediction) {
+  prediction.device_time_s = replayTruth.device_time_s ?? prediction.device_time_s ?? null;
+  prediction.sample_seq = replayTruth.seq ?? prediction.seq ?? null;
+  prediction.reference_calibration_id = replayTruth.calibration_id || prediction.reference_calibration_id || prediction.calibration_id || "";
+  prediction.reference_action_label = replayTruth.action || "";
+  prediction.reference_phase_label = replayTruth.phase || "";
+  prediction.reference_trial_id = replayTruth.trial || "";
+  prediction.reference_session_id = replayTruth.session || "";
+  prediction.reference_subject_id = replayTruth.subject || "";
+  prediction.reference_mount_site = replayTruth.site || "";
+  baseShowPrediction(prediction);
+  let truth = document.getElementById("outTruth");
+  if (!truth) { const node = document.createElement("div"); node.className = "metric"; node.innerHTML = "<small>Label ใน CSV</small><strong id=\"outTruth\">—</strong>"; document.querySelector(".prediction").appendChild(node); truth = document.getElementById("outTruth"); }
+  truth.textContent = replayTruth.action ? `${replayTruth.action} / ${replayTruth.phase || "ไม่ระบุ phase"}` : "—";
+};
+replayAt = async function (index) {
+  if (!csvRows.length) return;
+  cursor = index;
+  const anchor = csvRows[index], now = anchor.device_time_s, duration = metadata?.window_seconds || 1;
+  let first = index;
+  while (first > 0) {
+    const prior = csvRows[first - 1], next = csvRows[first];
+    const gap = next.device_time_s - prior.device_time_s;
+    if (prior.stream_epoch !== anchor.stream_epoch || prior.calibration_id !== anchor.calibration_id ||
+        prior.trial_id !== anchor.trial_id || prior.session_id !== anchor.session_id ||
+        prior.subject_id !== anchor.subject_id || prior.sensor_uid !== anchor.sensor_uid ||
+        prior.mount_site !== anchor.mount_site || prior.body_part !== anchor.body_part || prior.side !== anchor.side ||
+        prior.gap_before || next.gap_before || !prior.valid || !next.valid || prior.seq + 1 !== next.seq ||
+        gap <= 0 || gap > (metadata?.gap_reset_seconds||0.15) || now - prior.device_time_s > duration + 1e-9) break;
+    first--;
+  }
+  const rows = csvRows.slice(first, index + 1);
+  replayTruth = {action: anchor.action_label || "", phase: anchor.phase_label || "",
+    trial: anchor.trial_id || "", session: anchor.session_id || "", subject: anchor.subject_id || "", site: anchor.mount_site || "", device_time_s:anchor.device_time_s, seq:anchor.seq, calibration_id:anchor.calibration_id||""};
+  $("timeline").value = index;
+  $("csvInfo").textContent = `Sample ${index + 1}/${csvRows.length}; ${rows.length} in current window`;
+  if (!anchor.valid) showPrediction({body_part: anchor.body_part, action:"unknown", stage:"unknown", score:null, held_ms:0, calibrated:anchor.calibrated, reason:"sample_invalid"});
+  else if (rows.length > 2) await predictWindow(rows, {mount_site:anchor.mount_site, body_part:anchor.body_part,
+    stream_key:replayStreamKey, device_time_s:anchor.device_time_s, seq:anchor.seq,
+    stream_context:{sensor_uid:anchor.sensor_uid,mount_site:anchor.mount_site,body_part:anchor.body_part,side:anchor.side,
+      subject_id:anchor.subject_id,session_id:anchor.session_id,trial_id:anchor.trial_id,stream_epoch:anchor.stream_epoch,
+      calibration_id:anchor.calibration_id,calibration_method_version:anchor.calibration_method_version}});
+  else showPrediction({body_part: anchor.body_part, action:"unknown", stage:"unknown", score:null, held_ms:0, calibrated:anchor.calibrated, reason:"window_too_short"});
+};
+loadMetadata();
+</script>
+</body>
+</html>
