@@ -1,0 +1,186 @@
+{
+  "model_version": "pose-lumbar-flexion-extension-rf-20261010-v1",
+  "window_seconds": 0.5,
+  "sampling_hz": 20,
+  "action_windows": 336,
+  "phase_windows": 308,
+  "action_labels": [
+    "lumbar_extension",
+    "lumbar_flexion"
+  ],
+  "phase_labels": [
+    "approaching",
+    "holding",
+    "neutral",
+    "returning"
+  ],
+  "phase_model_available": true,
+  "phase_annotation_policy": "New recorder CSV phases require phase_annotation_reviewed=true; legacy CSVs without that column keep explicit phase labels",
+  "requires_calibration": true,
+  "selected_action_estimator": "random_forest",
+  "selected_phase_estimator": "svm_rbf",
+  "model_selection": {
+    "action": "grouped evaluation unavailable; RF retained as prototype",
+    "phase": "selected by group-separated macro-F1; RF preferred on ties"
+  },
+  "evaluation": {
+    "action_label": {
+      "random_forest": {
+        "available": false,
+        "reason": "No group-separated folds have enough classes to evaluate",
+        "grouped_by": "session_id",
+        "labels": [
+          "lumbar_extension",
+          "lumbar_flexion"
+        ],
+        "window_count": 336
+      },
+      "svm_rbf": {
+        "available": false,
+        "reason": "No group-separated folds have enough classes to evaluate",
+        "grouped_by": "session_id",
+        "labels": [
+          "lumbar_extension",
+          "lumbar_flexion"
+        ],
+        "window_count": 336
+      }
+    },
+    "phase_label": {
+      "random_forest": {
+        "available": true,
+        "grouped_by": "session_id",
+        "fold_count": 2,
+        "window_count": 308,
+        "accuracy": 0.3409090909090909,
+        "macro_f1": 0.23015091300630725,
+        "per_class": {
+          "approaching": {
+            "precision": 0.04,
+            "recall": 0.02631578947368421,
+            "f1": 0.031746031746031744,
+            "support": 38
+          },
+          "holding": {
+            "precision": 0.6352941176470588,
+            "recall": 0.3829787234042553,
+            "f1": 0.4778761061946903,
+            "support": 141
+          },
+          "neutral": {
+            "precision": 0.32666666666666666,
+            "recall": 0.46226415094339623,
+            "f1": 0.3828125,
+            "support": 106
+          },
+          "returning": {
+            "precision": 0.020833333333333332,
+            "recall": 0.043478260869565216,
+            "f1": 0.028169014084507043,
+            "support": 23
+          }
+        },
+        "confusion_matrix": [
+          [
+            1,
+            7,
+            15,
+            15
+          ],
+          [
+            6,
+            54,
+            79,
+            2
+          ],
+          [
+            5,
+            22,
+            49,
+            30
+          ],
+          [
+            13,
+            2,
+            7,
+            1
+          ]
+        ],
+        "labels": [
+          "approaching",
+          "holding",
+          "neutral",
+          "returning"
+        ]
+      },
+      "svm_rbf": {
+        "available": true,
+        "grouped_by": "session_id",
+        "fold_count": 2,
+        "window_count": 308,
+        "accuracy": 0.38311688311688313,
+        "macro_f1": 0.3041513848015176,
+        "per_class": {
+          "approaching": {
+            "precision": 0.125,
+            "recall": 0.07894736842105263,
+            "f1": 0.0967741935483871,
+            "support": 38
+          },
+          "holding": {
+            "precision": 0.6736842105263158,
+            "recall": 0.45390070921985815,
+            "f1": 0.5423728813559322,
+            "support": 141
+          },
+          "neutral": {
+            "precision": 0.5432098765432098,
+            "recall": 0.41509433962264153,
+            "f1": 0.47058823529411764,
+            "support": 106
+          },
+          "returning": {
+            "precision": 0.06481481481481481,
+            "recall": 0.30434782608695654,
+            "f1": 0.10687022900763359,
+            "support": 23
+          }
+        },
+        "confusion_matrix": [
+          [
+            3,
+            12,
+            8,
+            15
+          ],
+          [
+            2,
+            64,
+            25,
+            50
+          ],
+          [
+            14,
+            12,
+            44,
+            36
+          ],
+          [
+            5,
+            7,
+            4,
+            7
+          ]
+        ],
+        "labels": [
+          "approaching",
+          "holding",
+          "neutral",
+          "returning"
+        ]
+      }
+    }
+  },
+  "ignored_files": [],
+  "limitation": "Scores are not calibrated probabilities. Independent evaluation is unavailable wherever group-separated folds cannot cover all classes."
+}

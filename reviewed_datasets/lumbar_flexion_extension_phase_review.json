@@ -1,0 +1,456 @@
+{
+  "title": "Lumbar flexion and extension phase review before training",
+  "created_local_date": "2026-10-10",
+  "angle_policy": {
+    "primary_signal": "relative_pitch_deg change from each recording own initial neutral median (first 2.5 s)",
+    "cross_check": "relative_roll_deg, gyro magnitude, and stable angle plateaus",
+    "relative_tilt_deg": "not used; source files mark relative_angle_valid=false and tilt is not a valid joint angle",
+    "interpretation": "calibrated sensor orientation proxy, not direct lumbar joint angle",
+    "phase_source": "imu_signal_review_estimate; sensor-signal review, not video-confirmed ground truth"
+  },
+  "extension_phase_review": {
+    "trial-01_lumbar_lumbar_extension.csv": {
+      "reviewed_copy": "reviewed_datasets/trial-01_lumbar_lumbar_extension_phase-reviewed.csv",
+      "boundaries_device_elapsed_s": [
+        {
+          "elapsed_s": 0.0,
+          "phase": "neutral"
+        },
+        {
+          "elapsed_s": 3.783,
+          "phase": "approaching"
+        },
+        {
+          "elapsed_s": 5.095,
+          "phase": "holding"
+        },
+        {
+          "elapsed_s": 12.468,
+          "phase": "returning"
+        },
+        {
+          "elapsed_s": 13.182,
+          "phase": "unlabeled"
+        }
+      ],
+      "confidence_and_reason": "moderate: approach/hold/return are visible; return overshoots and final orientation stays displaced, so the tail is unlabeled",
+      "phase_counts": {
+        "": 54,
+        "approaching": 26,
+        "holding": 146,
+        "neutral": 75,
+        "returning": 14
+      },
+      "relative_pitch_change_range_deg": [
+        -16.54,
+        12.38
+      ],
+      "relative_roll_change_range_deg": [
+        -9.57,
+        13.56
+      ]
+    },
+    "trial-01_lumbar_lumbar_extension 2.csv": {
+      "reviewed_copy": "reviewed_datasets/trial-01_lumbar_lumbar_extension_2_phase-reviewed.csv",
+      "boundaries_device_elapsed_s": [
+        {
+          "elapsed_s": 0.0,
+          "phase": "neutral"
+        },
+        {
+          "elapsed_s": 2.213,
+          "phase": "approaching"
+        },
+        {
+          "elapsed_s": 6.174,
+          "phase": "holding"
+        },
+        {
+          "elapsed_s": 10.488,
+          "phase": "returning"
+        },
+        {
+          "elapsed_s": 11.915,
+          "phase": "unlabeled"
+        }
+      ],
+      "confidence_and_reason": "moderate: approach/hold/partial return are visible; it does not regain its initial neutral orientation, so the tail is unlabeled",
+      "phase_counts": {
+        "": 81,
+        "approaching": 78,
+        "holding": 85,
+        "neutral": 44,
+        "returning": 28
+      },
+      "relative_pitch_change_range_deg": [
+        -33.04,
+        5.8
+      ],
+      "relative_roll_change_range_deg": [
+        -8.94,
+        5.37
+      ]
+    },
+    "trial-01_lumbar_lumbar_extension 3.csv": {
+      "reviewed_copy": "reviewed_datasets/trial-01_lumbar_lumbar_extension_3_phase-reviewed.csv",
+      "boundaries_device_elapsed_s": [
+        {
+          "elapsed_s": 0.0,
+          "phase": "neutral"
+        },
+        {
+          "elapsed_s": 3.938,
+          "phase": "approaching"
+        },
+        {
+          "elapsed_s": 5.381,
+          "phase": "holding"
+        },
+        {
+          "elapsed_s": 11.372,
+          "phase": "returning"
+        },
+        {
+          "elapsed_s": 14.009,
+          "phase": "neutral"
+        }
+      ],
+      "confidence_and_reason": "moderate-high: approach/hold/return and a stable near-baseline ending are visible",
+      "phase_counts": {
+        "approaching": 28,
+        "holding": 118,
+        "neutral": 120,
+        "returning": 52
+      },
+      "relative_pitch_change_range_deg": [
+        -24.32,
+        9.74
+      ],
+      "relative_roll_change_range_deg": [
+        -8.0,
+        12.86
+      ]
+    }
+  },
+  "extension_data_quality": {
+    "trial-01_lumbar_lumbar_extension.csv": {
+      "samples": 315,
+      "duration_s": 15.841,
+      "median_sample_interval_ms": 50.0,
+      "min_sample_interval_ms": 48.0,
+      "max_sample_interval_ms": 59.0,
+      "seq_gaps": 0,
+      "duplicate_or_nonincreasing_seq": 0,
+      "nonincreasing_timestamp_count": 0,
+      "gaps_over_150ms": 0,
+      "invalid_rows": 0,
+      "calibrated": "true",
+      "calibration_id": "cal-6e5c0f78-13",
+      "calibration_method_version": "1",
+      "relative_orientation_valid": "true",
+      "relative_angle_valid": "false",
+      "session_id": "session-20261010084121",
+      "trial_id": "trial-01",
+      "subject_id": "P01",
+      "mount_site": "lumbar",
+      "body_part": "lumbar",
+      "side": "center",
+      "phase_counts": {
+        "": 54,
+        "approaching": 26,
+        "holding": 146,
+        "neutral": 75,
+        "returning": 14
+      },
+      "sampling_hz_approx": 20.0
+    },
+    "trial-01_lumbar_lumbar_extension 2.csv": {
+      "samples": 316,
+      "duration_s": 15.94,
+      "median_sample_interval_ms": 50.0,
+      "min_sample_interval_ms": 49.0,
+      "max_sample_interval_ms": 60.0,
+      "seq_gaps": 0,
+      "duplicate_or_nonincreasing_seq": 0,
+      "nonincreasing_timestamp_count": 0,
+      "gaps_over_150ms": 0,
+      "invalid_rows": 0,
+      "calibrated": "true",
+      "calibration_id": "cal-6e5c0f78-13",
+      "calibration_method_version": "1",
+      "relative_orientation_valid": "true",
+      "relative_angle_valid": "false",
+      "session_id": "session-20261010084121",
+      "trial_id": "trial-01",
+      "subject_id": "P01",
+      "mount_site": "lumbar",
+      "body_part": "lumbar",
+      "side": "center",
+      "phase_counts": {
+        "": 81,
+        "approaching": 78,
+        "holding": 85,
+        "neutral": 44,
+        "returning": 28
+      },
+      "sampling_hz_approx": 20.0
+    },
+    "trial-01_lumbar_lumbar_extension 3.csv": {
+      "samples": 318,
+      "duration_s": 16.081,
+      "median_sample_interval_ms": 50.0,
+      "min_sample_interval_ms": 48.0,
+      "max_sample_interval_ms": 61.0,
+      "seq_gaps": 0,
+      "duplicate_or_nonincreasing_seq": 0,
+      "nonincreasing_timestamp_count": 0,
+      "gaps_over_150ms": 0,
+      "invalid_rows": 0,
+      "calibrated": "true",
+      "calibration_id": "cal-6e5c0f78-13",
+      "calibration_method_version": "1",
+      "relative_orientation_valid": "true",
+      "relative_angle_valid": "false",
+      "session_id": "session-20261010084121",
+      "trial_id": "trial-01",
+      "subject_id": "P01",
+      "mount_site": "lumbar",
+      "body_part": "lumbar",
+      "side": "center",
+      "phase_counts": {
+        "approaching": 28,
+        "holding": 118,
+        "neutral": 120,
+        "returning": 52
+      },
+      "sampling_hz_approx": 20.0
+    }
+  },
+  "training_plan": {
+    "flexion_inputs": [
+      "reviewed_datasets/trial-01_lumbar_lumbar_flexion_3_phase-reviewed.csv",
+      "reviewed_datasets/trial-01_lumbar_lumbar_flexion_4_phase-reviewed.csv",
+      "reviewed_datasets/trial-01_lumbar_lumbar_flexion_5_phase-reviewed.csv"
+    ],
+    "extension_inputs": [
+      "reviewed_datasets/trial-01_lumbar_lumbar_extension_phase-reviewed.csv",
+      "reviewed_datasets/trial-01_lumbar_lumbar_extension_2_phase-reviewed.csv",
+      "reviewed_datasets/trial-01_lumbar_lumbar_extension_3_phase-reviewed.csv"
+    ],
+    "window_seconds": 0.5,
+    "feature_pipeline": "tools/imu_features.py shared causal full sensor feature pipeline (raw accel/gyro + calibrated relative pitch and roll + mount/body/side context)",
+    "model_comparison": "Random Forest and RBF SVM via tools/train_model.py",
+    "output_directory": "models/pose_model_lumbar_flexion_extension_20261010",
+    "no_existing_model_overwritten": true
+  },
+  "limitations": [
+    "All extension files share one session; all flexion files share a second session. Action labels are confounded with these two sessions, so action evaluation by independent session cannot estimate generalization.",
+    "All captures are from one subject, P01, and one lumbar center mount.",
+    "Two extension recordings do not return to their initial neutral orientation; their unsupported tails are left with blank phase labels.",
+    "Angle channels are valid calibrated orientation, but relative_angle_valid is false; these are sensor orientation proxies, not joint-angle truth.",
+    "Reviewed phase boundaries are estimates from pitch/roll/gyro time series; no synchronized video or external annotation was supplied."
+  ],
+  "reviewed_chart": "reviewed_datasets/lumbar_flexion_extension_phase_review.png",
+  "training_result": {
+    "model_bundle": "models/pose_model_lumbar_flexion_extension_20261010/model_bundle.joblib",
+    "evaluation_file": "models/pose_model_lumbar_flexion_extension_20261010/evaluation.json",
+    "model_version": "pose-lumbar-flexion-extension-rf-20261010-v1",
+    "window_seconds": 0.5,
+    "sampling_hz": 20,
+    "action_windows": 336,
+    "phase_windows": 308,
+    "action_labels": [
+      "lumbar_extension",
+      "lumbar_flexion"
+    ],
+    "phase_labels": [
+      "approaching",
+      "holding",
+      "neutral",
+      "returning"
+    ],
+    "feature_pipeline": "shared full pipeline; raw accelerometer and gyroscope plus calibrated relative roll and pitch; same pipeline for train/predict",
+    "phase_model_available": true,
+    "selected_action_estimator": "random_forest",
+    "selected_phase_estimator": "svm_rbf",
+    "action_evaluation": {
+      "random_forest": {
+        "available": false,
+        "reason": "No group-separated folds have enough classes to evaluate",
+        "grouped_by": "session_id",
+        "labels": [
+          "lumbar_extension",
+          "lumbar_flexion"
+        ],
+        "window_count": 336
+      },
+      "svm_rbf": {
+        "available": false,
+        "reason": "No group-separated folds have enough classes to evaluate",
+        "grouped_by": "session_id",
+        "labels": [
+          "lumbar_extension",
+          "lumbar_flexion"
+        ],
+        "window_count": 336
+      }
+    },
+    "phase_evaluation": {
+      "random_forest": {
+        "available": true,
+        "grouped_by": "session_id",
+        "fold_count": 2,
+        "window_count": 308,
+        "accuracy": 0.3409090909090909,
+        "macro_f1": 0.23015091300630725,
+        "per_class": {
+          "approaching": {
+            "precision": 0.04,
+            "recall": 0.02631578947368421,
+            "f1": 0.031746031746031744,
+            "support": 38
+          },
+          "holding": {
+            "precision": 0.6352941176470588,
+            "recall": 0.3829787234042553,
+            "f1": 0.4778761061946903,
+            "support": 141
+          },
+          "neutral": {
+            "precision": 0.32666666666666666,
+            "recall": 0.46226415094339623,
+            "f1": 0.3828125,
+            "support": 106
+          },
+          "returning": {
+            "precision": 0.020833333333333332,
+            "recall": 0.043478260869565216,
+            "f1": 0.028169014084507043,
+            "support": 23
+          }
+        },
+        "confusion_matrix": [
+          [
+            1,
+            7,
+            15,
+            15
+          ],
+          [
+            6,
+            54,
+            79,
+            2
+          ],
+          [
+            5,
+            22,
+            49,
+            30
+          ],
+          [
+            13,
+            2,
+            7,
+            1
+          ]
+        ],
+        "labels": [
+          "approaching",
+          "holding",
+          "neutral",
+          "returning"
+        ]
+      },
+      "svm_rbf": {
+        "available": true,
+        "grouped_by": "session_id",
+        "fold_count": 2,
+        "window_count": 308,
+        "accuracy": 0.38311688311688313,
+        "macro_f1": 0.3041513848015176,
+        "per_class": {
+          "approaching": {
+            "precision": 0.125,
+            "recall": 0.07894736842105263,
+            "f1": 0.0967741935483871,
+            "support": 38
+          },
+          "holding": {
+            "precision": 0.6736842105263158,
+            "recall": 0.45390070921985815,
+            "f1": 0.5423728813559322,
+            "support": 141
+          },
+          "neutral": {
+            "precision": 0.5432098765432098,
+            "recall": 0.41509433962264153,
+            "f1": 0.47058823529411764,
+            "support": 106
+          },
+          "returning": {
+            "precision": 0.06481481481481481,
+            "recall": 0.30434782608695654,
+            "f1": 0.10687022900763359,
+            "support": 23
+          }
+        },
+        "confusion_matrix": [
+          [
+            3,
+            12,
+            8,
+            15
+          ],
+          [
+            2,
+            64,
+            25,
+            50
+          ],
+          [
+            14,
+            12,
+            44,
+            36
+          ],
+          [
+            5,
+            7,
+            4,
+            7
+          ]
+        ],
+        "labels": [
+          "approaching",
+          "holding",
+          "neutral",
+          "returning"
+        ]
+      }
+    },
+    "interpretation": "Action model is fit on all eligible windows as a prototype, but session-grouped action evaluation is unavailable because each action occurs in only one session. Phase scores are a two-session diagnostic for one subject, not a generalization guarantee.",
+    "limitations": "Scores are not calibrated probabilities. Independent evaluation is unavailable wherever group-separated folds cannot cover all classes.",
+    "feature_count": 48
+  },
+  "annotation_integrity_check": {
+    "trial-01_lumbar_lumbar_extension_phase-reviewed.csv": {
+      "source_rows": 315,
+      "reviewed_rows": 315,
+      "non_annotation_differences": 0,
+      "first_differences": []
+    },
+    "trial-01_lumbar_lumbar_extension_2_phase-reviewed.csv": {
+      "source_rows": 316,
+      "reviewed_rows": 316,
+      "non_annotation_differences": 0,
+      "first_differences": []
+    },
+    "trial-01_lumbar_lumbar_extension_3_phase-reviewed.csv": {
+      "source_rows": 318,
+      "reviewed_rows": 318,
+      "non_annotation_differences": 0,
+      "first_differences": []
+    }
+  }
+}

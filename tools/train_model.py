@@ -267,6 +267,8 @@ def main():
     parser.add_argument("--output", type=Path, default=ROOT / "models" / "pose_model")
     parser.add_argument("--window", type=float, default=1.0)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--model-version", default=None,
+                        help="Optional stable model identifier recorded in the bundle and report")
     args = parser.parse_args()
     config = load_config(args.config)
     inputs = args.inputs or sorted((ROOT / "whist").glob("*.csv"))
@@ -386,7 +388,7 @@ def main():
         },
         "units": {"accel": "m/s^2", "gyro": "rad/s", "orientation": "degrees"},
         "score_kind": "uncalibrated estimator score; not a guaranteed probability",
-        "model_version": f"pose-{selected_action_model.replace('_', '-')}-v1",
+        "model_version": args.model_version or f"pose-{selected_action_model.replace('_', '-')}-v1",
         "config": config,
         "evaluation": evaluations,
         "phase_unavailable_reason": None if phase_model else (

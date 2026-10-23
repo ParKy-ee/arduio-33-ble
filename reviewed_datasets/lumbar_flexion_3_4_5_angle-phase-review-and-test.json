@@ -1,0 +1,1100 @@
+{
+  "sources": {
+    "flexion_3": "C:\\Users\\GF\\Downloads\\trial-01_lumbar_lumbar_flexion 3.csv",
+    "flexion_4": "C:\\Users\\GF\\Downloads\\trial-01_lumbar_lumbar_flexion 4.csv",
+    "flexion_5": "C:\\Users\\GF\\Downloads\\trial-01_lumbar_lumbar_flexion 5.csv"
+  },
+  "reviewed_copies": {
+    "flexion_3": "C:\\Users\\GF\\Documents\\PlatformIO\\Projects\\arduio-33-ble\\reviewed_datasets\\trial-01_lumbar_lumbar_flexion_3_phase-reviewed.csv",
+    "flexion_4": "C:\\Users\\GF\\Documents\\PlatformIO\\Projects\\arduio-33-ble\\reviewed_datasets\\trial-01_lumbar_lumbar_flexion_4_phase-reviewed.csv",
+    "flexion_5": "C:\\Users\\GF\\Documents\\PlatformIO\\Projects\\arduio-33-ble\\reviewed_datasets\\trial-01_lumbar_lumbar_flexion_5_phase-reviewed.csv"
+  },
+  "source_files_preserved": true,
+  "angle_policy": {
+    "primary_fields": [
+      "relative_pitch_deg",
+      "relative_roll_deg"
+    ],
+    "comparison": "Use each recording?s own first 2.5 seconds as its neutral reference; compare within-recording angle changes, not absolute initial values across files.",
+    "not_used": "relative_tilt_deg is all zero and relative_angle_valid=false, so it was not treated as a valid angle.",
+    "interpretation": "relative roll/pitch are calibrated sensor orientation proxies; they are not direct lumbar joint angles."
+  },
+  "phase_review": {
+    "clock": "monotonic device boot_ms relative to each file first sample",
+    "boundaries": {
+      "flexion_3": [
+        {
+          "device_elapsed_ms": 0,
+          "phase": "neutral"
+        },
+        {
+          "device_elapsed_ms": 3850,
+          "phase": "approaching"
+        },
+        {
+          "device_elapsed_ms": 6250,
+          "phase": "holding"
+        },
+        {
+          "device_elapsed_ms": 12070,
+          "phase": "returning"
+        },
+        {
+          "device_elapsed_ms": 13660,
+          "phase": "neutral"
+        }
+      ],
+      "flexion_4": [
+        {
+          "device_elapsed_ms": 0,
+          "phase": "neutral"
+        },
+        {
+          "device_elapsed_ms": 3700,
+          "phase": "approaching"
+        },
+        {
+          "device_elapsed_ms": 5300,
+          "phase": "holding"
+        },
+        {
+          "device_elapsed_ms": 13350,
+          "phase": "returning"
+        },
+        {
+          "device_elapsed_ms": 14100,
+          "phase": "neutral"
+        }
+      ],
+      "flexion_5": [
+        {
+          "device_elapsed_ms": 0,
+          "phase": "neutral"
+        },
+        {
+          "device_elapsed_ms": 3700,
+          "phase": "approaching"
+        },
+        {
+          "device_elapsed_ms": 5300,
+          "phase": "holding"
+        },
+        {
+          "device_elapsed_ms": 11650,
+          "phase": "returning"
+        },
+        {
+          "device_elapsed_ms": 13000,
+          "phase": "neutral"
+        }
+      ]
+    },
+    "original_cue_runs": {
+      "flexion_3": [
+        {
+          "phase": "neutral",
+          "first_host_elapsed_ms": 0.0,
+          "last_host_elapsed_ms": 2962.0,
+          "sample_count": 61
+        },
+        {
+          "phase": "approaching",
+          "first_host_elapsed_ms": 3053.0,
+          "last_host_elapsed_ms": 5989.0,
+          "sample_count": 60
+        },
+        {
+          "phase": "holding",
+          "first_host_elapsed_ms": 6039.0,
+          "last_host_elapsed_ms": 10995.0,
+          "sample_count": 99
+        },
+        {
+          "phase": "returning",
+          "first_host_elapsed_ms": 11045.0,
+          "last_host_elapsed_ms": 13970.0,
+          "sample_count": 58
+        },
+        {
+          "phase": "neutral",
+          "first_host_elapsed_ms": 14009.0,
+          "last_host_elapsed_ms": 16054.0,
+          "sample_count": 42
+        }
+      ],
+      "flexion_4": [
+        {
+          "phase": "neutral",
+          "first_host_elapsed_ms": 0.0,
+          "last_host_elapsed_ms": 2987.0,
+          "sample_count": 62
+        },
+        {
+          "phase": "approaching",
+          "first_host_elapsed_ms": 3037.0,
+          "last_host_elapsed_ms": 5956.0,
+          "sample_count": 58
+        },
+        {
+          "phase": "holding",
+          "first_host_elapsed_ms": 6003.0,
+          "last_host_elapsed_ms": 10973.0,
+          "sample_count": 99
+        },
+        {
+          "phase": "returning",
+          "first_host_elapsed_ms": 11025.0,
+          "last_host_elapsed_ms": 13997.0,
+          "sample_count": 60
+        },
+        {
+          "phase": "neutral",
+          "first_host_elapsed_ms": 14047.0,
+          "last_host_elapsed_ms": 16030.0,
+          "sample_count": 40
+        }
+      ],
+      "flexion_5": [
+        {
+          "phase": "neutral",
+          "first_host_elapsed_ms": 14.0,
+          "last_host_elapsed_ms": 2990.0,
+          "sample_count": 59
+        },
+        {
+          "phase": "approaching",
+          "first_host_elapsed_ms": 3043.0,
+          "last_host_elapsed_ms": 5983.0,
+          "sample_count": 59
+        },
+        {
+          "phase": "holding",
+          "first_host_elapsed_ms": 6033.0,
+          "last_host_elapsed_ms": 10999.0,
+          "sample_count": 99
+        },
+        {
+          "phase": "returning",
+          "first_host_elapsed_ms": 11051.0,
+          "last_host_elapsed_ms": 13980.0,
+          "sample_count": 59
+        },
+        {
+          "phase": "neutral",
+          "first_host_elapsed_ms": 14030.0,
+          "last_host_elapsed_ms": 15999.0,
+          "sample_count": 39
+        }
+      ]
+    },
+    "reasoning_by_file": {
+      "flexion_4": [
+        "Neutral to approaching: relative_pitch starts a sustained rise above its initial neutral band at about 3.7 s; the guided cue near 3.0 s is early.",
+        "Approaching to holding: relative_pitch reaches about 47?50 degrees and flattens around 5.3 s; guided cue near 6.0 s is late.",
+        "Holding to returning: after a long partial-angle drift, a sustained final decrease toward the initial angle begins near 13.35 s; guided cue near 11.0 s is early. Confidence is limited because roll/pitch drift during the nominal hold and there may be an intermediate reposition.",
+        "Returning to neutral: relative_pitch returns near the first neutral band around 14.1 s and then remains stable; guided cue near 14.0 s is close."
+      ],
+      "flexion_5": [
+        "Neutral to approaching: relative_pitch begins a sustained rise around 3.7 s; guided cue near 3.0 s is early.",
+        "Approaching to holding: relative_pitch reaches the 48?52 degree plateau around 5.3 s; guided cue near 6.0 s is late.",
+        "Holding to returning: relative_pitch begins a sustained decline around 11.65 s; guided cue near 11.0 s is early by about 0.65 s.",
+        "Returning to neutral: the angle reaches its final stable band around 13.0 s; guided cue near 14.0 s is late by about 1 s."
+      ]
+    },
+    "signal_summary": {
+      "flexion_3": {
+        "calibration_id": [
+          "cal-6e5c0f78-11"
+        ],
+        "baseline_first_2_5s_deg": {
+          "relative_roll_deg": -1.333,
+          "relative_pitch_deg": -3.449
+        },
+        "final_neutral_deg": {
+          "relative_roll_deg": 7.032,
+          "relative_pitch_deg": -2.176
+        },
+        "initial_to_final_neutral_delta_deg": {
+          "relative_roll_deg": 8.365,
+          "relative_pitch_deg": 1.273
+        },
+        "phase_counts_samples": {
+          "neutral": 126,
+          "approaching": 47,
+          "holding": 116,
+          "returning": 31
+        }
+      },
+      "flexion_4": {
+        "calibration_id": [
+          "cal-6e5c0f78-12"
+        ],
+        "baseline_first_2_5s_deg": {
+          "relative_roll_deg": 4.459,
+          "relative_pitch_deg": 26.212
+        },
+        "final_neutral_deg": {
+          "relative_roll_deg": 1.331,
+          "relative_pitch_deg": 24.133
+        },
+        "initial_to_final_neutral_delta_deg": {
+          "relative_roll_deg": -3.128,
+          "relative_pitch_deg": -2.079
+        },
+        "phase_counts_samples": {
+          "neutral": 115,
+          "approaching": 31,
+          "holding": 158,
+          "returning": 15
+        }
+      },
+      "flexion_5": {
+        "calibration_id": [
+          "cal-6e5c0f78-12"
+        ],
+        "baseline_first_2_5s_deg": {
+          "relative_roll_deg": 3.957,
+          "relative_pitch_deg": 11.568
+        },
+        "final_neutral_deg": {
+          "relative_roll_deg": 4.305,
+          "relative_pitch_deg": 15.59
+        },
+        "initial_to_final_neutral_delta_deg": {
+          "relative_roll_deg": 0.348,
+          "relative_pitch_deg": 4.022
+        },
+        "phase_counts_samples": {
+          "neutral": 132,
+          "approaching": 31,
+          "holding": 126,
+          "returning": 26
+        }
+      }
+    },
+    "cross_file_observation": "Files 4 and 5 both show dominant relative_pitch movement, while file 3 is dominated by relative_roll. Files 4 and 5 share calibration_id but their starting neutral relative_pitch medians differ substantially, so the sensor/body starting orientation was not consistent even with the same recorded calibration id.",
+    "uncertainty": "File 4 has a sizable orientation drift/reposition while the cue says holding; the holding/returning boundary is only an estimate of the final sustained return. Video or manual annotation is needed to distinguish body motion from sensor slip.",
+    "confidence_by_file": {
+      "flexion_3": "moderate; movement/plateau/return are visible, but final neutral differs from start by about 8.4 deg in relative roll.",
+      "flexion_4": "moderate for approach and target; low-to-moderate for holding/returning because the angle drifts and shows an intermediate reposition before the final return.",
+      "flexion_5": "moderate-to-high; approach, plateau, sustained return and final stable region are visible; end neutral differs from start by about 4 deg in relative pitch."
+    }
+  },
+  "data_quality": {
+    "flexion_3": {
+      "sample_count": 320,
+      "device_duration_ms": 16122,
+      "device_interval_ms_median": 50.0,
+      "device_interval_ms_min": 48.0,
+      "device_interval_ms_max": 60.0,
+      "sequence_gap_count": 0,
+      "duplicate_sequence_count": 0,
+      "nonincreasing_host_elapsed_steps": 4,
+      "calibrated": [
+        "true"
+      ],
+      "relative_angle_valid": [
+        "false"
+      ],
+      "relative_orientation_valid": [
+        "true"
+      ],
+      "phase_annotation_reviewed": [
+        "true"
+      ],
+      "phase_annotation_source": [
+        "imu_signal_review_estimate",
+        "recording_start"
+      ]
+    },
+    "flexion_4": {
+      "sample_count": 319,
+      "device_duration_ms": 16120,
+      "device_interval_ms_median": 50.0,
+      "device_interval_ms_min": 48.0,
+      "device_interval_ms_max": 60.0,
+      "sequence_gap_count": 0,
+      "duplicate_sequence_count": 0,
+      "nonincreasing_host_elapsed_steps": 4,
+      "calibrated": [
+        "true"
+      ],
+      "relative_angle_valid": [
+        "false"
+      ],
+      "relative_orientation_valid": [
+        "true"
+      ],
+      "phase_annotation_reviewed": [
+        "true"
+      ],
+      "phase_annotation_source": [
+        "imu_signal_review_estimate",
+        "recording_start"
+      ]
+    },
+    "flexion_5": {
+      "sample_count": 315,
+      "device_duration_ms": 15956,
+      "device_interval_ms_median": 50.0,
+      "device_interval_ms_min": 48.0,
+      "device_interval_ms_max": 60.0,
+      "sequence_gap_count": 0,
+      "duplicate_sequence_count": 0,
+      "nonincreasing_host_elapsed_steps": 1,
+      "calibrated": [
+        "true"
+      ],
+      "relative_angle_valid": [
+        "false"
+      ],
+      "relative_orientation_valid": [
+        "true"
+      ],
+      "phase_annotation_reviewed": [
+        "true"
+      ],
+      "phase_annotation_source": [
+        "imu_signal_review_estimate",
+        "recording_start"
+      ]
+    }
+  },
+  "model_test": {
+    "kind": "leave-one-recording-file-out diagnostic; RF and SVM trained on two reviewed files, tested on the third; same 0.5 s causal feature pipeline",
+    "window_seconds": 0.5,
+    "sampling_hz": 20,
+    "feature_count": 48,
+    "window_counts_by_file": {
+      "flexion_3": {
+        "total": 55,
+        "by_phase": {
+          "neutral": 22,
+          "approaching": 8,
+          "holding": 21,
+          "returning": 4
+        }
+      },
+      "flexion_4": {
+        "total": 56,
+        "by_phase": {
+          "neutral": 19,
+          "approaching": 5,
+          "holding": 31,
+          "returning": 1
+        }
+      },
+      "flexion_5": {
+        "total": 55,
+        "by_phase": {
+          "neutral": 23,
+          "approaching": 4,
+          "holding": 24,
+          "returning": 4
+        }
+      }
+    },
+    "labels": [
+      "approaching",
+      "holding",
+      "neutral",
+      "returning"
+    ],
+    "results": {
+      "random_forest": {
+        "accuracy": 0.7048,
+        "macro_f1": 0.5586,
+        "per_class": {
+          "approaching": {
+            "precision": 0.5714,
+            "recall": 0.7059,
+            "f1": 0.6316,
+            "support": 17
+          },
+          "holding": {
+            "precision": 0.9524,
+            "recall": 0.5263,
+            "f1": 0.678,
+            "support": 76
+          },
+          "neutral": {
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 64
+          },
+          "returning": {
+            "precision": 0.1429,
+            "recall": 0.1111,
+            "f1": 0.125,
+            "support": 9
+          }
+        },
+        "confusion_matrix": [
+          [
+            12,
+            1,
+            4,
+            0
+          ],
+          [
+            9,
+            40,
+            21,
+            6
+          ],
+          [
+            0,
+            0,
+            64,
+            0
+          ],
+          [
+            0,
+            1,
+            7,
+            1
+          ]
+        ],
+        "confusion_labels": [
+          "approaching",
+          "holding",
+          "neutral",
+          "returning"
+        ],
+        "folds": {
+          "flexion_3": {
+            "train_windows": 111,
+            "test_windows": 55,
+            "test_phase_counts": {
+              "neutral": 22,
+              "approaching": 8,
+              "holding": 21,
+              "returning": 4
+            },
+            "predicted_counts": {
+              "neutral": 51,
+              "approaching": 3,
+              "holding": 1
+            },
+            "accuracy": 0.4545,
+            "macro_f1": 0.287
+          },
+          "flexion_4": {
+            "train_windows": 110,
+            "test_windows": 56,
+            "test_phase_counts": {
+              "neutral": 19,
+              "approaching": 5,
+              "holding": 31,
+              "returning": 1
+            },
+            "predicted_counts": {
+              "neutral": 19,
+              "approaching": 14,
+              "returning": 7,
+              "holding": 16
+            },
+            "accuracy": 0.7321,
+            "macro_f1": 0.6143
+          },
+          "flexion_5": {
+            "train_windows": 111,
+            "test_windows": 55,
+            "test_phase_counts": {
+              "neutral": 23,
+              "approaching": 4,
+              "holding": 24,
+              "returning": 4
+            },
+            "predicted_counts": {
+              "neutral": 26,
+              "approaching": 4,
+              "holding": 25
+            },
+            "accuracy": 0.9273,
+            "macro_f1": 0.7296
+          }
+        }
+      },
+      "svm_rbf": {
+        "accuracy": 0.747,
+        "macro_f1": 0.6606,
+        "per_class": {
+          "approaching": {
+            "precision": 0.4783,
+            "recall": 0.6471,
+            "f1": 0.55,
+            "support": 17
+          },
+          "holding": {
+            "precision": 0.7229,
+            "recall": 0.7895,
+            "f1": 0.7547,
+            "support": 76
+          },
+          "neutral": {
+            "precision": 0.9245,
+            "recall": 0.7656,
+            "f1": 0.8376,
+            "support": 64
+          },
+          "returning": {
+            "precision": 0.5714,
+            "recall": 0.4444,
+            "f1": 0.5,
+            "support": 9
+          }
+        },
+        "confusion_matrix": [
+          [
+            11,
+            5,
+            1,
+            0
+          ],
+          [
+            12,
+            60,
+            2,
+            2
+          ],
+          [
+            0,
+            14,
+            49,
+            1
+          ],
+          [
+            0,
+            4,
+            1,
+            4
+          ]
+        ],
+        "confusion_labels": [
+          "approaching",
+          "holding",
+          "neutral",
+          "returning"
+        ],
+        "folds": {
+          "flexion_3": {
+            "train_windows": 111,
+            "test_windows": 55,
+            "test_phase_counts": {
+              "neutral": 22,
+              "approaching": 8,
+              "holding": 21,
+              "returning": 4
+            },
+            "predicted_counts": {
+              "holding": 43,
+              "approaching": 2,
+              "neutral": 10
+            },
+            "accuracy": 0.5636,
+            "macro_f1": 0.3891
+          },
+          "flexion_4": {
+            "train_windows": 110,
+            "test_windows": 56,
+            "test_phase_counts": {
+              "neutral": 19,
+              "approaching": 5,
+              "holding": 31,
+              "returning": 1
+            },
+            "predicted_counts": {
+              "neutral": 20,
+              "returning": 4,
+              "approaching": 17,
+              "holding": 15
+            },
+            "accuracy": 0.6964,
+            "macro_f1": 0.6074
+          },
+          "flexion_5": {
+            "train_windows": 111,
+            "test_windows": 55,
+            "test_phase_counts": {
+              "neutral": 23,
+              "approaching": 4,
+              "holding": 24,
+              "returning": 4
+            },
+            "predicted_counts": {
+              "neutral": 23,
+              "approaching": 4,
+              "holding": 25,
+              "returning": 3
+            },
+            "accuracy": 0.9818,
+            "macro_f1": 0.9592
+          }
+        }
+      }
+    },
+    "action_test": "Not evaluated: all files contain only lumbar_flexion.",
+    "evaluation_limitations": [
+      "All three CSVs reuse the same subject_id, session_id and trial_id. File-level holdout prevents the exact windows from crossing folds, but this is not independent session-level validation.",
+      "Only one person, one body site, one action, and three short recordings.",
+      "The reviewed labels for files 4 and 5 are signal-based estimates; file 4 contains a drift/possible sensor reposition during holding.",
+      "No probability calibration was performed; score outputs are not guaranteed probabilities.",
+      "The existing saved bundle was not overwritten; this is only a diagnostic model comparison."
+    ],
+    "majority_class_baseline_accuracy": 0.4578,
+    "existing_saved_bundle": {
+      "path": "C:\\Users\\GF\\Documents\\PlatformIO\\Projects\\arduio-33-ble\\models\\pose_model_lumbar_signal_review_500ms_20261010\\evaluation.json",
+      "phase_model_available": false,
+      "note": "The previously saved bundle was not overwritten; its phase model was unavailable in its last recorded evaluation. The RF/SVM scores here are a file-level diagnostic."
+    },
+    "pitch_only_diagnostic": {
+      "features": [
+        "relative_pitch_deg_mean__at_lumbar",
+        "relative_pitch_deg_std__at_lumbar",
+        "relative_pitch_deg_range__at_lumbar",
+        "relative_pitch_deg_slope_per_s__at_lumbar",
+        "site__lumbar",
+        "body_part__lumbar",
+        "side__center",
+        "relative_orientation_valid"
+      ],
+      "window_seconds": 0.5,
+      "same_file_level_leave_one_out_split": true,
+      "results": {
+        "files_4_and_5_only": {
+          "random_forest": {
+            "accuracy": 0.8919,
+            "macro_f1": 0.7665,
+            "per_class": {
+              "approaching": {
+                "precision": 1.0,
+                "recall": 0.6667,
+                "f1": 0.8,
+                "support": 9
+              },
+              "holding": {
+                "precision": 0.96,
+                "recall": 0.8727,
+                "f1": 0.9143,
+                "support": 55
+              },
+              "neutral": {
+                "precision": 0.9545,
+                "recall": 1.0,
+                "f1": 0.9767,
+                "support": 42
+              },
+              "returning": {
+                "precision": 0.2727,
+                "recall": 0.6,
+                "f1": 0.375,
+                "support": 5
+              }
+            },
+            "confusion_matrix": [
+              [
+                6,
+                2,
+                0,
+                1
+              ],
+              [
+                0,
+                48,
+                0,
+                7
+              ],
+              [
+                0,
+                0,
+                42,
+                0
+              ],
+              [
+                0,
+                0,
+                2,
+                3
+              ]
+            ],
+            "confusion_labels": [
+              "approaching",
+              "holding",
+              "neutral",
+              "returning"
+            ],
+            "folds": {
+              "flexion_4": {
+                "n_test": 56,
+                "phase_counts": {
+                  "neutral": 19,
+                  "approaching": 5,
+                  "holding": 31,
+                  "returning": 1
+                },
+                "predicted": {
+                  "neutral": 19,
+                  "holding": 26,
+                  "returning": 9,
+                  "approaching": 2
+                },
+                "accuracy": 0.8214,
+                "macro_f1": 0.6534
+              },
+              "flexion_5": {
+                "n_test": 55,
+                "phase_counts": {
+                  "neutral": 23,
+                  "approaching": 4,
+                  "holding": 24,
+                  "returning": 4
+                },
+                "predicted": {
+                  "neutral": 25,
+                  "approaching": 4,
+                  "holding": 24,
+                  "returning": 2
+                },
+                "accuracy": 0.9636,
+                "macro_f1": 0.9062
+              }
+            }
+          },
+          "svm_rbf": {
+            "accuracy": 0.9099,
+            "macro_f1": 0.7361,
+            "per_class": {
+              "approaching": {
+                "precision": 0.6667,
+                "recall": 0.6667,
+                "f1": 0.6667,
+                "support": 9
+              },
+              "holding": {
+                "precision": 0.9623,
+                "recall": 0.9273,
+                "f1": 0.9444,
+                "support": 55
+              },
+              "neutral": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "support": 42
+              },
+              "returning": {
+                "precision": 0.2857,
+                "recall": 0.4,
+                "f1": 0.3333,
+                "support": 5
+              }
+            },
+            "confusion_matrix": [
+              [
+                6,
+                2,
+                0,
+                1
+              ],
+              [
+                0,
+                51,
+                0,
+                4
+              ],
+              [
+                0,
+                0,
+                42,
+                0
+              ],
+              [
+                3,
+                0,
+                0,
+                2
+              ]
+            ],
+            "confusion_labels": [
+              "approaching",
+              "holding",
+              "neutral",
+              "returning"
+            ],
+            "folds": {
+              "flexion_4": {
+                "n_test": 56,
+                "phase_counts": {
+                  "neutral": 19,
+                  "approaching": 5,
+                  "holding": 31,
+                  "returning": 1
+                },
+                "predicted": {
+                  "neutral": 19,
+                  "holding": 29,
+                  "returning": 6,
+                  "approaching": 2
+                },
+                "accuracy": 0.875,
+                "macro_f1": 0.6893
+              },
+              "flexion_5": {
+                "n_test": 55,
+                "phase_counts": {
+                  "neutral": 23,
+                  "approaching": 4,
+                  "holding": 24,
+                  "returning": 4
+                },
+                "predicted": {
+                  "neutral": 23,
+                  "approaching": 7,
+                  "holding": 24,
+                  "returning": 1
+                },
+                "accuracy": 0.9455,
+                "macro_f1": 0.7818
+              }
+            }
+          }
+        },
+        "files_3_4_5": {
+          "random_forest": {
+            "accuracy": 0.6024,
+            "macro_f1": 0.5584,
+            "per_class": {
+              "approaching": {
+                "precision": 0.5556,
+                "recall": 0.5882,
+                "f1": 0.5714,
+                "support": 17
+              },
+              "holding": {
+                "precision": 0.6667,
+                "recall": 0.5789,
+                "f1": 0.6197,
+                "support": 76
+              },
+              "neutral": {
+                "precision": 0.6119,
+                "recall": 0.6406,
+                "f1": 0.626,
+                "support": 64
+              },
+              "returning": {
+                "precision": 0.3333,
+                "recall": 0.5556,
+                "f1": 0.4167,
+                "support": 9
+              }
+            },
+            "confusion_matrix": [
+              [
+                10,
+                2,
+                3,
+                2
+              ],
+              [
+                3,
+                44,
+                23,
+                6
+              ],
+              [
+                4,
+                17,
+                41,
+                2
+              ],
+              [
+                1,
+                3,
+                0,
+                5
+              ]
+            ],
+            "confusion_labels": [
+              "approaching",
+              "holding",
+              "neutral",
+              "returning"
+            ],
+            "folds": {
+              "flexion_3": {
+                "n_test": 55,
+                "phase_counts": {
+                  "neutral": 22,
+                  "approaching": 8,
+                  "holding": 21,
+                  "returning": 4
+                },
+                "predicted": {
+                  "neutral": 40,
+                  "holding": 4,
+                  "approaching": 7,
+                  "returning": 4
+                },
+                "accuracy": 0.3455,
+                "macro_f1": 0.229
+              },
+              "flexion_4": {
+                "n_test": 56,
+                "phase_counts": {
+                  "neutral": 19,
+                  "approaching": 5,
+                  "holding": 31,
+                  "returning": 1
+                },
+                "predicted": {
+                  "neutral": 21,
+                  "holding": 23,
+                  "approaching": 5,
+                  "returning": 7
+                },
+                "accuracy": 0.7857,
+                "macro_f1": 0.6444
+              },
+              "flexion_5": {
+                "n_test": 55,
+                "phase_counts": {
+                  "neutral": 23,
+                  "approaching": 4,
+                  "holding": 24,
+                  "returning": 4
+                },
+                "predicted": {
+                  "holding": 39,
+                  "approaching": 6,
+                  "returning": 4,
+                  "neutral": 6
+                },
+                "accuracy": 0.6727,
+                "macro_f1": 0.736
+              }
+            }
+          },
+          "svm_rbf": {
+            "accuracy": 0.6928,
+            "macro_f1": 0.5672,
+            "per_class": {
+              "approaching": {
+                "precision": 0.5,
+                "recall": 0.5294,
+                "f1": 0.5143,
+                "support": 17
+              },
+              "holding": {
+                "precision": 0.9412,
+                "recall": 0.6316,
+                "f1": 0.7559,
+                "support": 76
+              },
+              "neutral": {
+                "precision": 0.679,
+                "recall": 0.8594,
+                "f1": 0.7586,
+                "support": 64
+              },
+              "returning": {
+                "precision": 0.1875,
+                "recall": 0.3333,
+                "f1": 0.24,
+                "support": 9
+              }
+            },
+            "confusion_matrix": [
+              [
+                9,
+                2,
+                3,
+                3
+              ],
+              [
+                1,
+                48,
+                21,
+                6
+              ],
+              [
+                4,
+                1,
+                55,
+                4
+              ],
+              [
+                4,
+                0,
+                2,
+                3
+              ]
+            ],
+            "confusion_labels": [
+              "approaching",
+              "holding",
+              "neutral",
+              "returning"
+            ],
+            "folds": {
+              "flexion_3": {
+                "n_test": 55,
+                "phase_counts": {
+                  "neutral": 22,
+                  "approaching": 8,
+                  "holding": 21,
+                  "returning": 4
+                },
+                "predicted": {
+                  "neutral": 42,
+                  "returning": 7,
+                  "approaching": 6
+                },
+                "accuracy": 0.3636,
+                "macro_f1": 0.2776
+              },
+              "flexion_4": {
+                "n_test": 56,
+                "phase_counts": {
+                  "neutral": 19,
+                  "approaching": 5,
+                  "holding": 31,
+                  "returning": 1
+                },
+                "predicted": {
+                  "neutral": 19,
+                  "holding": 26,
+                  "returning": 8,
+                  "approaching": 3
+                },
+                "accuracy": 0.8214,
+                "macro_f1": 0.6411
+              },
+              "flexion_5": {
+                "n_test": 55,
+                "phase_counts": {
+                  "neutral": 23,
+                  "approaching": 4,
+                  "holding": 24,
+                  "returning": 4
+                },
+                "predicted": {
+                  "neutral": 20,
+                  "approaching": 9,
+                  "holding": 25,
+                  "returning": 1
+                },
+                "accuracy": 0.8909,
+                "macro_f1": 0.7313
+              }
+            }
+          }
+        }
+      },
+      "interpretation": "Pitch-only is useful for files 4 and 5, where relative_pitch carries the main flexion movement; including file 3 lowers transfer because file 3 is roll-dominant. This is a diagnostic, not a replacement deployed model.",
+      "no_model_bundle_saved": true
+    }
+  }
+}

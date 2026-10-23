@@ -1,0 +1,508 @@
+{
+  "source_file": "C:\\Users\\GF\\Downloads\\trial-01_lumbar_lumbar_extension 5.csv",
+  "source_modified": false,
+  "model_bundle": "models/pose_model_lumbar_flexion_extension_20261010/model_bundle.joblib",
+  "model_version": "pose-lumbar-flexion-extension-rf-20261010-v1",
+  "feature_version": "imu-window-v2-site-gated",
+  "window_seconds": 0.5,
+  "sampling_hz_expected": 20.0,
+  "score_kind": "uncalibrated estimator score; not a guaranteed probability",
+  "capture": {
+    "samples": 317,
+    "duration_s": 15.969,
+    "median_interval_ms": 50.0,
+    "min_interval_ms": 49.0,
+    "max_interval_ms": 61.0,
+    "seq_gaps": 0,
+    "calibration_id": "cal-6e5c0f78-14",
+    "calibrated_values": [
+      "true"
+    ],
+    "orientation_valid_values": [
+      "true"
+    ],
+    "relative_angle_valid_values": [
+      "false"
+    ],
+    "action_label_metadata": {
+      "lumbar_extension": 317
+    },
+    "phase_labels_metadata": {
+      "neutral": 100,
+      "approaching": 59,
+      "holding": 100,
+      "returning": 58
+    },
+    "phase_annotation_source": [
+      "guided_timer_cue"
+    ],
+    "phase_annotation_reviewed": [
+      "false"
+    ]
+  },
+  "replay": {
+    "prediction_windows": 307,
+    "action_predictions": {
+      "lumbar_extension": 261,
+      "unknown": 27,
+      "lumbar_flexion": 19
+    },
+    "stage_predictions": {
+      "unknown": 293,
+      "approaching": 10,
+      "holding": 4
+    },
+    "action_score_min_median_max_uncalibrated": [
+      0.5507,
+      0.6531,
+      0.8447
+    ],
+    "action_score_mean_uncalibrated": 0.6609,
+    "windows_matching_file_action_label": 261,
+    "windows_with_nonunknown_action": 280,
+    "metadata_match_rate_not_accuracy": 0.9321,
+    "timeline_1s": [
+      {
+        "start_s": 0.0,
+        "end_s": 1.0,
+        "n_overlapping_windows": 11,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 11
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 11
+        },
+        "mean_action_score_uncalibrated": 0.6453,
+        "mean_p_flexion_uncalibrated": 0.3547,
+        "mean_p_extension_uncalibrated": 0.6453
+      },
+      {
+        "start_s": 1.0,
+        "end_s": 2.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 20
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 20
+        },
+        "mean_action_score_uncalibrated": 0.6574,
+        "mean_p_flexion_uncalibrated": 0.3425,
+        "mean_p_extension_uncalibrated": 0.6575
+      },
+      {
+        "start_s": 2.0,
+        "end_s": 3.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 20
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 20
+        },
+        "mean_action_score_uncalibrated": 0.6508,
+        "mean_p_flexion_uncalibrated": 0.3492,
+        "mean_p_extension_uncalibrated": 0.6508
+      },
+      {
+        "start_s": 3.0,
+        "end_s": 4.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 20
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 20
+        },
+        "mean_action_score_uncalibrated": 0.6654,
+        "mean_p_flexion_uncalibrated": 0.3346,
+        "mean_p_extension_uncalibrated": 0.6654
+      },
+      {
+        "start_s": 4.0,
+        "end_s": 5.0,
+        "n_overlapping_windows": 19,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 19
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 19
+        },
+        "mean_action_score_uncalibrated": 0.6999,
+        "mean_p_flexion_uncalibrated": 0.3001,
+        "mean_p_extension_uncalibrated": 0.6999
+      },
+      {
+        "start_s": 5.0,
+        "end_s": 6.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 16,
+          "unknown": 4
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 18,
+          "approaching": 2
+        },
+        "mean_action_score_uncalibrated": 0.6523,
+        "mean_p_flexion_uncalibrated": 0.3807,
+        "mean_p_extension_uncalibrated": 0.6193
+      },
+      {
+        "start_s": 6.0,
+        "end_s": 7.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 20
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 20
+        },
+        "mean_action_score_uncalibrated": 0.6244,
+        "mean_p_flexion_uncalibrated": 0.3756,
+        "mean_p_extension_uncalibrated": 0.6244
+      },
+      {
+        "start_s": 7.0,
+        "end_s": 8.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 20
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 20
+        },
+        "mean_action_score_uncalibrated": 0.6366,
+        "mean_p_flexion_uncalibrated": 0.3634,
+        "mean_p_extension_uncalibrated": 0.6366
+      },
+      {
+        "start_s": 8.0,
+        "end_s": 9.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 20
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 16,
+          "holding": 4
+        },
+        "mean_action_score_uncalibrated": 0.6426,
+        "mean_p_flexion_uncalibrated": 0.3574,
+        "mean_p_extension_uncalibrated": 0.6426
+      },
+      {
+        "start_s": 9.0,
+        "end_s": 10.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 20
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "approaching": 2,
+          "unknown": 18
+        },
+        "mean_action_score_uncalibrated": 0.6935,
+        "mean_p_flexion_uncalibrated": 0.3065,
+        "mean_p_extension_uncalibrated": 0.6935
+      },
+      {
+        "start_s": 10.0,
+        "end_s": 11.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 18,
+          "unknown": 2
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 15,
+          "approaching": 5
+        },
+        "mean_action_score_uncalibrated": 0.6747,
+        "mean_p_flexion_uncalibrated": 0.3408,
+        "mean_p_extension_uncalibrated": 0.6592
+      },
+      {
+        "start_s": 11.0,
+        "end_s": 12.0,
+        "n_overlapping_windows": 19,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 19
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 19
+        },
+        "mean_action_score_uncalibrated": 0.807,
+        "mean_p_flexion_uncalibrated": 0.193,
+        "mean_p_extension_uncalibrated": 0.807
+      },
+      {
+        "start_s": 12.0,
+        "end_s": 13.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 16,
+          "unknown": 4
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 20
+        },
+        "mean_action_score_uncalibrated": 0.6016,
+        "mean_p_flexion_uncalibrated": 0.4185,
+        "mean_p_extension_uncalibrated": 0.5815
+      },
+      {
+        "start_s": 13.0,
+        "end_s": 14.0,
+        "n_overlapping_windows": 19,
+        "action_mode": "lumbar_flexion",
+        "action_counts": {
+          "unknown": 4,
+          "lumbar_flexion": 15
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 19
+        },
+        "mean_action_score_uncalibrated": 0.6315,
+        "mean_p_flexion_uncalibrated": 0.5967,
+        "mean_p_extension_uncalibrated": 0.4033
+      },
+      {
+        "start_s": 14.0,
+        "end_s": 15.0,
+        "n_overlapping_windows": 19,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 11,
+          "unknown": 8
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 19
+        },
+        "mean_action_score_uncalibrated": 0.5928,
+        "mean_p_flexion_uncalibrated": 0.4368,
+        "mean_p_extension_uncalibrated": 0.5632
+      },
+      {
+        "start_s": 15.0,
+        "end_s": 16.0,
+        "n_overlapping_windows": 20,
+        "action_mode": "lumbar_extension",
+        "action_counts": {
+          "lumbar_extension": 11,
+          "unknown": 5,
+          "lumbar_flexion": 4
+        },
+        "stage_mode": "unknown",
+        "stage_counts": {
+          "unknown": 19,
+          "approaching": 1
+        },
+        "mean_action_score_uncalibrated": 0.6477,
+        "mean_p_flexion_uncalibrated": 0.4319,
+        "mean_p_extension_uncalibrated": 0.5681
+      }
+    ]
+  },
+  "training_evaluation_summary": {
+    "action_estimator": "random_forest",
+    "action_evaluation": {
+      "random_forest": {
+        "available": false,
+        "reason": "No group-separated folds have enough classes to evaluate",
+        "grouped_by": "session_id",
+        "labels": [
+          "lumbar_extension",
+          "lumbar_flexion"
+        ],
+        "window_count": 336
+      },
+      "svm_rbf": {
+        "available": false,
+        "reason": "No group-separated folds have enough classes to evaluate",
+        "grouped_by": "session_id",
+        "labels": [
+          "lumbar_extension",
+          "lumbar_flexion"
+        ],
+        "window_count": 336
+      }
+    },
+    "phase_estimator": "svm_rbf",
+    "phase_evaluation": {
+      "random_forest": {
+        "available": true,
+        "grouped_by": "session_id",
+        "fold_count": 2,
+        "window_count": 308,
+        "accuracy": 0.3409090909090909,
+        "macro_f1": 0.23015091300630725,
+        "per_class": {
+          "approaching": {
+            "precision": 0.04,
+            "recall": 0.02631578947368421,
+            "f1": 0.031746031746031744,
+            "support": 38
+          },
+          "holding": {
+            "precision": 0.6352941176470588,
+            "recall": 0.3829787234042553,
+            "f1": 0.4778761061946903,
+            "support": 141
+          },
+          "neutral": {
+            "precision": 0.32666666666666666,
+            "recall": 0.46226415094339623,
+            "f1": 0.3828125,
+            "support": 106
+          },
+          "returning": {
+            "precision": 0.020833333333333332,
+            "recall": 0.043478260869565216,
+            "f1": 0.028169014084507043,
+            "support": 23
+          }
+        },
+        "confusion_matrix": [
+          [
+            1,
+            7,
+            15,
+            15
+          ],
+          [
+            6,
+            54,
+            79,
+            2
+          ],
+          [
+            5,
+            22,
+            49,
+            30
+          ],
+          [
+            13,
+            2,
+            7,
+            1
+          ]
+        ],
+        "labels": [
+          "approaching",
+          "holding",
+          "neutral",
+          "returning"
+        ]
+      },
+      "svm_rbf": {
+        "available": true,
+        "grouped_by": "session_id",
+        "fold_count": 2,
+        "window_count": 308,
+        "accuracy": 0.38311688311688313,
+        "macro_f1": 0.3041513848015176,
+        "per_class": {
+          "approaching": {
+            "precision": 0.125,
+            "recall": 0.07894736842105263,
+            "f1": 0.0967741935483871,
+            "support": 38
+          },
+          "holding": {
+            "precision": 0.6736842105263158,
+            "recall": 0.45390070921985815,
+            "f1": 0.5423728813559322,
+            "support": 141
+          },
+          "neutral": {
+            "precision": 0.5432098765432098,
+            "recall": 0.41509433962264153,
+            "f1": 0.47058823529411764,
+            "support": 106
+          },
+          "returning": {
+            "precision": 0.06481481481481481,
+            "recall": 0.30434782608695654,
+            "f1": 0.10687022900763359,
+            "support": 23
+          }
+        },
+        "confusion_matrix": [
+          [
+            3,
+            12,
+            8,
+            15
+          ],
+          [
+            2,
+            64,
+            25,
+            50
+          ],
+          [
+            14,
+            12,
+            44,
+            36
+          ],
+          [
+            5,
+            7,
+            4,
+            7
+          ]
+        ],
+        "labels": [
+          "approaching",
+          "holding",
+          "neutral",
+          "returning"
+        ]
+      }
+    }
+  },
+  "interpretation": {
+    "is_accuracy": false,
+    "reason": "No independently reviewed per-segment action ground truth; source CSV has one file-level action label despite reported mixed movements. Predictions overlap heavily and estimator scores are not calibrated probabilities.",
+    "action_labeling": "Predictions are model-generated pseudo-labels only; verify each movement interval manually before training.",
+    "phase_labeling": "No new phase ground truth assigned; timer phases are unreviewed cues.",
+    "limitations": "Action generalization has no independent held-out session per action in current training report; this recording cannot establish test accuracy.",
+    "candidate_review_note": "The replay suggests mostly lumbar_extension, a short model-predicted lumbar_flexion interval near 13-14 s, then mixed/uncertain output. This is a review hint only, not an assigned ground-truth label."
+  },
+  "artifacts": {
+    "prediction_csv": "reviewed_datasets\\trial-01_lumbar_lumbar_extension_5_model_replay.csv",
+    "signal_review_plot": "reviewed_datasets/lumbar_extension_5_unlabeled_signal_review.png",
+    "replay_plot": "reviewed_datasets\\trial-01_lumbar_lumbar_extension_5_model_replay.png"
+  }
+}

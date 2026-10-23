@@ -1,0 +1,72 @@
+{
+  "model_version": "pose-random-forest-v1",
+  "window_seconds": 1.0,
+  "sampling_hz": 20,
+  "action_windows": 22,
+  "phase_windows": 22,
+  "action_labels": [
+    "lumbar_flexion"
+  ],
+  "phase_labels": [
+    "holding",
+    "neutral",
+    "returning"
+  ],
+  "phase_model_available": false,
+  "phase_annotation_policy": "New recorder CSV phases require phase_annotation_reviewed=true; legacy CSVs without that column keep explicit phase labels",
+  "requires_calibration": true,
+  "selected_action_estimator": "random_forest",
+  "selected_phase_estimator": null,
+  "model_selection": {
+    "action": "grouped evaluation unavailable; RF retained as prototype",
+    "phase": "grouped evaluation unavailable; RF retained as prototype"
+  },
+  "evaluation": {
+    "action_label": {
+      "random_forest": {
+        "available": false,
+        "reason": "Need at least two groups and two classes; found 1 groups and 1 classes",
+        "grouped_by": "session_id",
+        "labels": [
+          "lumbar_flexion"
+        ],
+        "window_count": 22
+      },
+      "svm_rbf": {
+        "available": false,
+        "reason": "Need at least two groups and two classes; found 1 groups and 1 classes",
+        "grouped_by": "session_id",
+        "labels": [
+          "lumbar_flexion"
+        ],
+        "window_count": 22
+      }
+    },
+    "phase_label": {
+      "random_forest": {
+        "available": false,
+        "reason": "Need at least two groups and two classes; found 1 groups and 3 classes",
+        "grouped_by": "session_id",
+        "labels": [
+          "holding",
+          "neutral",
+          "returning"
+        ],
+        "window_count": 22
+      },
+      "svm_rbf": {
+        "available": false,
+        "reason": "Need at least two groups and two classes; found 1 groups and 3 classes",
+        "grouped_by": "session_id",
+        "labels": [
+          "holding",
+          "neutral",
+          "returning"
+        ],
+        "window_count": 22
+      }
+    }
+  },
+  "ignored_files": [],
+  "limitation": "Scores are not calibrated probabilities. Independent evaluation is unavailable wherever group-separated folds cannot cover all classes."
+}

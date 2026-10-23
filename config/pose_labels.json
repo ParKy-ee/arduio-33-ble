@@ -37,7 +37,7 @@
       "body_axis_profile": "chest"
     },
     "neck": {
-      "label": "?????",
+      "label": "ต้นคอ",
       "body_axis_profile": "neck"
     },
     "head": {
@@ -45,11 +45,11 @@
       "body_axis_profile": "head"
     },
     "lumbar": {
-      "label": "???????????????",
+      "label": "หลังส่วนล่าง (สันหลังส่วนเอว)",
       "body_axis_profile": "lumbar"
     },
     "pelvis": {
-      "label": "????????/?????",
+      "label": "เชิงกราน (บริเวณก้นกบ)",
       "body_axis_profile": "pelvis"
     },
     "left_thigh": {
@@ -84,6 +84,8 @@
   "body_parts": {
     "wrist": {
       "label": "ข้อมือ",
+      "side_mode": "bilateral",
+      "recommended_mount_sites": ["wrist", "left_forearm", "right_forearm"],
       "actions": [
         {
           "id": "wrist_up",
@@ -111,6 +113,8 @@
     },
     "elbow": {
       "label": "ข้อศอก",
+      "side_mode": "bilateral",
+      "recommended_mount_sites": ["elbow", "left_forearm", "right_forearm"],
       "actions": [
         {
           "id": "elbow_raise_arm",
@@ -126,94 +130,102 @@
     },
     "shoulder": {
       "label": "หัวไหล่",
+      "side_mode": "bilateral",
+      "recommended_mount_sites": ["shoulder", "left_upper_arm", "right_upper_arm"],
       "actions": []
     },
     "neck": {
-      "label": "?????",
+      "label": "ต้นคอ",
+      "side_mode": "midline",
+      "recommended_mount_sites": ["neck"],
       "actions": [
         {
           "id": "neck_neutral",
-          "label": "?????",
+          "label": "คอตรง / ท่ากลาง",
           "legacy_files": []
         },
         {
           "id": "neck_flexion",
-          "label": "?????",
+          "label": "ก้มคอ",
           "legacy_files": []
         },
         {
           "id": "neck_extension",
-          "label": "?????",
+          "label": "เงยคอ",
           "legacy_files": []
         },
         {
           "id": "neck_lateral_flexion_left",
-          "label": "???????????",
+          "label": "เอียงคอไปทางซ้าย",
           "legacy_files": []
         },
         {
           "id": "neck_lateral_flexion_right",
-          "label": "??????????",
+          "label": "เอียงคอไปทางขวา",
           "legacy_files": []
         }
       ]
     },
     "lumbar": {
-      "label": "???????????????",
+      "label": "หลังส่วนล่าง (สันหลังส่วนเอว)",
+      "side_mode": "midline",
+      "recommended_mount_sites": ["lumbar"],
       "actions": [
         {
           "id": "lumbar_neutral",
-          "label": "???????",
+          "label": "หลังตรง / ท่ากลาง",
           "legacy_files": []
         },
         {
           "id": "lumbar_flexion",
-          "label": "????????",
+          "label": "ก้มลำตัว",
           "legacy_files": []
         },
         {
           "id": "lumbar_extension",
-          "label": "????????",
+          "label": "แอ่นลำตัว",
           "legacy_files": []
         },
         {
           "id": "lumbar_lateral_flexion_left",
-          "label": "??????????????",
+          "label": "เอียงลำตัวไปทางซ้าย",
           "legacy_files": []
         },
         {
           "id": "lumbar_lateral_flexion_right",
-          "label": "?????????????",
+          "label": "เอียงลำตัวไปทางขวา",
           "legacy_files": []
         }
       ]
     },
     "pelvis": {
-      "label": "???????? (???????????)",
+      "label": "เชิงกราน (บริเวณก้นกบ)",
+      "side_mode": "midline",
+      "recommended_mount_sites": ["pelvis"],
       "actions": [
         {
           "id": "pelvis_neutral",
-          "label": "????????????",
+          "label": "เชิงกรานท่ากลาง",
           "legacy_files": []
         },
         {
           "id": "pelvis_anterior_tilt",
-          "label": "???????????????????",
+          "label": "หมุนเชิงกรานไปด้านหน้า",
           "legacy_files": []
         },
         {
           "id": "pelvis_posterior_tilt",
-          "label": "???????????????????",
+          "label": "หมุนเชิงกรานไปด้านหลัง",
           "legacy_files": []
         },
         {
           "id": "pelvis_lateral_tilt_left",
-          "label": "?????????????????",
+          "label": "เอียงเชิงกรานไปทางซ้าย",
           "legacy_files": []
         },
         {
           "id": "pelvis_lateral_tilt_right",
-          "label": "????????????????",
+          "label": "เอียงเชิงกรานไปทางขวา",
           "legacy_files": []
         }
       ]

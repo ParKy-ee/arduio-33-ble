@@ -16,13 +16,13 @@ OUTPUT = ROOT / "src" / "webpage.h"
 CAPTURE_HTML = r"""
     <section id="datasetCapture" class="record-card">
       <div class="record-head"><div><strong>เก็บข้อมูล IMU สำหรับฝึกโมเดล</strong>
-        <small>ตรวจตำแหน่งที่ firmware แจ้งก่อนเริ่ม · label เป็น metadata แยกจากรหัสอุปกรณ์</small></div>
+        <small>ตำแหน่งติด IMU คือจุดที่ติดเซนเซอร์จริงจาก firmware; ส่วนร่างกายใช้เลือกชุดท่า/label</small></div>
         <span id="datasetRecordStatus" class="record-status">พร้อม</span></div>
       <div class="record-controls">
-        <label class="record-field">ตำแหน่งติด IMU<select id="datasetMountSite"></select></label>
-        <label class="record-field">ส่วนร่างกาย<select id="datasetBodyPart"></select></label>
+        <label class="record-field">ตำแหน่งติด IMU (ตั้งที่ calibrate)<select id="datasetMountSite"></select></label>
+        <label class="record-field">ส่วนร่างกาย / ชุดท่า<select id="datasetBodyPart"></select></label>
         <label class="record-field">ท่า<select id="datasetAction"></select></label>
-        <label class="record-field">ข้าง<select id="datasetSide"><option value="unknown">ไม่ระบุ</option><option value="left">ซ้าย</option><option value="right">ขวา</option></select></label>
+        <label class="record-field">ข้าง<select id="datasetSide"><option value="" selected disabled>เลือกซ้าย/ขวา</option><option value="left">ซ้าย</option><option value="right">ขวา</option><option value="center">กึ่งกลาง / ไม่ใช้ข้าง</option><option value="unknown">ไม่ทราบ</option></select></label>
         <label class="record-field">ผู้เข้าร่วม<input id="datasetSubject" value="P01" maxlength="40"></label>
         <label class="record-field">Session<input id="datasetSession" maxlength="60"></label>
         <label class="record-field">Trial<input id="datasetTrial" value="trial-01" maxlength="60"></label>
@@ -33,6 +33,8 @@ CAPTURE_HTML = r"""
         <span id="datasetCount" class="record-count">0 samples</span>
         <span id="datasetDevice" class="record-count">รอ ESP</span>
       </div>
+      <p class="record-feedback">ระหว่างอัด จำนวน sample ควรเพิ่มขึ้น ข้อมูลพักอยู่ในหน้านี้ก่อน; กดหยุดแล้วคลิกลิงก์ CSV ที่สร้างด้านล่างเพื่อดาวน์โหลด</p>
+      <p class="record-feedback">ถ้าจะเก็บข้อมูลคอ: ติด IMU ที่คอ แล้วเข้า calibrate เลือก neck และเริ่ม calibrate ก่อนกลับมาเลือก “ต้นคอ” ที่ส่วนร่างกาย; คอเป็นตำแหน่งกึ่งกลาง จึงไม่ต้องเลือกซ้าย/ขวา</p>
       <div class="record-controls" style="margin-top:10px">
         <span class="record-count">ปิดตัวช่วยจับเวลาเพื่อใช้ปุ่มทำเครื่องหมายด้วยมือ:</span>
         <button data-phase="neutral" class="phase-mark" type="button" disabled>ปกติ</button>
@@ -58,7 +60,7 @@ CAPTURE_HTML = r"""
         <p class="record-feedback">ตั้งเวลาของแต่ละช่วงได้ 1–120 วินาที กดเริ่มครั้งเดียวแล้วทำตามเสียง/แถบได้ ระบบหยุดเองเมื่อช่วงสุดท้ายครบ จุดเวลาจากตัวช่วยเป็น cue เบื้องต้น ต้องตรวจและยืนยันในตารางก่อนใช้ฝึกโมเดล</p>
       </div>
       <p id="datasetFeedback" class="record-feedback" role="status">เปิดหน้านี้จาก Wi-Fi ของ ESP32; ปรับเวลาเริ่ม phase ได้หลังหยุดบันทึก</p>
-      <p class="record-feedback"><a href="/calibrate" class="recording-link">ตั้งท่ากลาง / calibrate IMU</a></p>
+      <p class="record-feedback"><a id="datasetCalibrateLink" href="/calibrate" class="recording-link">ตั้งตำแหน่ง IMU และท่ากลาง / calibrate IMU</a></p>
       <div id="phaseEditor" class="phase-editor"></div>
       <div id="datasetLinks" class="recording-list" aria-live="polite"></div>
     </section>
@@ -67,6 +69,9 @@ CAPTURE_HTML = r"""
 
 CAPTURE_CSS = r"""
     .record-card { margin-top:14px;padding:15px;background:rgba(17,27,37,.94);border:1px solid var(--line);border-radius:13px }
+    #datasetCapture .record-status.error { background:rgba(255,119,119,.16);color:#ff9292 }
+    #datasetCapture .record-status.recording { background:rgba(255,119,119,.16);color:#ff9292 }
+    #datasetCapture .record-status.done { background:rgba(116,240,194,.13);color:var(--mint) }
     section.record-card[aria-labelledby="recordTitle"] { display:none }
     .phase-editor { display:grid;gap:6px;margin-top:10px }
     .phase-edit-row { display:grid;grid-template-columns:minmax(90px,.65fr) minmax(130px,1fr) minmax(120px,.8fr) auto;gap:8px;align-items:center }
@@ -192,14 +197,44 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
         const item = datasetConfig.body_parts[body.value]; const select = dataset$("datasetAction"); select.innerHTML = "";
         (item.actions || []).forEach(function (action) { const option = document.createElement("option"); option.value = action.id; option.textContent = action.label + " (" + action.id + ")"; select.appendChild(option); });
         select.disabled = !item.actions || !item.actions.length;
-        if (select.disabled) { const option = document.createElement("option"); option.value = ""; option.textContent = "เพิ่มท่าใน config/pose_labels.json ก่อน"; select.appendChild(option); }
+        if (select.disabled) { const option = document.createElement("option"); option.value = ""; option.textContent = "ยังไม่มีท่าใน config/pose_labels.json"; select.appendChild(option); }
+        updateDatasetSideControl();
       }
-      body.addEventListener("change", refreshActions); refreshActions();
+      body.addEventListener("change", refreshActions);
+      site.addEventListener("change", updateDatasetSideControl);
+      refreshActions();
+    }
+
+    function updateDatasetSideControl() {
+      const body = datasetConfig.body_parts[dataset$("datasetBodyPart").value] || {};
+      const side = dataset$("datasetSide");
+      const site = dataset$("datasetMountSite").value || "";
+      const siteSide = site.indexOf("left_") === 0 ? "left" : (site.indexOf("right_") === 0 ? "right" : "");
+      if (body.side_mode === "midline") {
+        side.value = "center";
+        side.disabled = true;
+        return;
+      }
+      if (side.value === "center" || side.disabled) side.value = siteSide;
+      if (siteSide) side.value = siteSide;
+      side.disabled = false;
     }
 
     function setDatasetStatus(text, state) {
       const item = dataset$("datasetRecordStatus"); item.textContent = text;
       item.className = "record-status" + (state ? " " + state : "");
+    }
+
+    function reportDatasetStartBlock(message, focusId) {
+      dataset$("datasetFeedback").textContent = message;
+      setDatasetStatus("ยังไม่เริ่ม · ตรวจข้อมูล", "error");
+      if (focusId) {
+        const control = dataset$(focusId);
+        if (control) {
+          control.focus();
+          control.scrollIntoView({behavior:"smooth",block:"center"});
+        }
+      }
     }
 
     function setDatasetPhaseButtons(enabled) {
@@ -375,18 +410,32 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
     }
 
     function startDatasetRecording() {
-      if (!latestLiveData || latestLiveData.valid !== true) { dataset$("datasetFeedback").textContent = "ยังไม่ได้รับข้อมูล IMU ที่ใช้ได้"; return; }
+      if (activeRecording) { reportDatasetStartBlock("มีการบันทึกค้างอยู่แล้ว ให้กดหยุดก่อนเริ่มรอบใหม่", "datasetStop"); return; }
+      if (!latestLiveData || latestLiveData.valid !== true) { reportDatasetStartBlock("ยังไม่ได้รับ sample ที่ใช้ได้จาก ESP; ตรวจว่าเปิดหน้านี้จาก IP ของ ESP และสถานะ Live เชื่อมต่ออยู่", "datasetStart"); return; }
       const configuredSite = dataset$("datasetMountSite").value;
       const deviceSite = latestLiveData.mount_site || latestLiveData.sensor_id;
       if (deviceSite && configuredSite !== deviceSite) {
-        dataset$("datasetFeedback").textContent = "ตำแหน่งที่เลือกไม่ตรงกับ firmware (" + deviceSite + "); เลือก build ที่ตรงตำแหน่งแล้ว upload ก่อน"; return;
+        reportDatasetStartBlock("ตำแหน่งที่เลือกไม่ตรงกับ firmware (" + deviceSite + "); เลือกตำแหน่งที่ติดตั้งจริงและตั้ง firmware ให้ตรงก่อน", "datasetMountSite"); return;
       }
-      if (!dataset$("datasetAction").value) { dataset$("datasetFeedback").textContent = "ตำแหน่งร่างกายนี้ยังไม่มี action ใน config"; return; }
+      const bodyConfig = datasetConfig.body_parts[dataset$("datasetBodyPart").value];
+      if (!bodyConfig) { reportDatasetStartBlock("เลือกส่วนร่างกายก่อนเริ่มบันทึก", "datasetBodyPart"); return; }
+      const recommendedSites = bodyConfig.recommended_mount_sites || [];
+      if (recommendedSites.length && !recommendedSites.includes(configuredSite)) {
+        const recommendedLabels = recommendedSites.map(function (site) { return datasetConfig.mount_sites[site] ? datasetConfig.mount_sites[site].label : site; });
+        reportDatasetStartBlock("ส่วนร่างกายนี้ต้องติด IMU ที่ " + recommendedLabels.join(" หรือ ") + " แต่ ESP ตอนนี้รายงานว่า " + (datasetConfig.mount_sites[configuredSite] ? datasetConfig.mount_sites[configuredSite].label : configuredSite) + ". ช่องตำแหน่งติด IMU ถูกล็อกตาม ESP; ย้ายเซนเซอร์ไปตำแหน่งที่ต้องการ แล้วเข้า /calibrate เพื่อเลือกและ calibrate ตำแหน่งนั้นก่อน", "datasetCalibrateLink");
+        return;
+      }
+      if (!dataset$("datasetAction").value) { reportDatasetStartBlock("ตำแหน่งร่างกายนี้ยังไม่มี action ใน config/pose_labels.json", "datasetAction"); return; }
+      const sideMode = bodyConfig.side_mode;
+      if (sideMode !== "midline" && !["left", "right"].includes(dataset$("datasetSide").value)) {
+        reportDatasetStartBlock("เลือกซ้ายหรือขวาก่อนเริ่มอัด (ตอนนี้ยังไม่ระบุข้าง จึงยังไม่เริ่มบันทึก)", "datasetSide");
+        return;
+      }
       const guidedEnabled = dataset$("datasetGuidedEnabled").checked;
       let guide = null;
       if (guidedEnabled) {
         try { guide = readGuidedSchedule(); }
-        catch (error) { dataset$("datasetFeedback").textContent = error.message; return; }
+        catch (error) { reportDatasetStartBlock(error.message, "guidedStepList"); return; }
       }
       recordLocation.value = configuredSite;
       recordLabel.value = dataset$("datasetAction").value;
@@ -403,9 +452,13 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
       activeRecording.actionLabel = dataset$("datasetAction").value;
       activeRecording.calibrationId = latestLiveData.calibration_id || "";
       activeRecording.streamEpoch = 0;
-      activeRecording.lastBootMs = null;
-      activeRecording.lastSeq = null;
+      activeRecording.lastBootMs = Number(latestLiveData.sample_ms);
+      activeRecording.lastSeq = liveAfterSeq;
+      activeRecording.lastBootId = liveBootId;
+      activeRecording.lastSampleKey = String(latestLiveData.sample_ms) + ":" + String(liveAfterSeq);
       activeRecording.gapCount = 0;
+      activeRecording.lastCapturedAtMs = Date.now();
+      activeRecording.streamStalled = false;
       const firstPhase = guide ? guide.segments[0].phase : "neutral";
       activeRecording.phaseEvents = [{at_ms: 0, phase: firstPhase, source: guide ? "guided_timer_cue" : "recording_start_unreviewed", reviewed: false}];
       activeRecording.startedEpochMs = Date.now();
@@ -446,7 +499,7 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
     }
 
     function csvValue(value) { const text = value == null ? "" : String(value); return /[\",\r\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text; }
-    const DATASET_COLUMNS = ["sensor_uid","firmware_sensor_id","mount_site","body_part","side","subject_id","session_id","trial_id","action_label","phase_label","phase_elapsed_ms","phase_annotation_source","phase_annotation_reviewed","calibration_id","calibration_method_version","calibration_time_boot_ms","calibration_boot_id","calibrated","relative_angle_valid","relative_orientation_valid","unit_accel","unit_gyro","host_time_iso","host_time_s","host_elapsed_ms","boot_ms","seq","stream_epoch","gap_before","accel_x","accel_y","accel_z","gyro_x","gyro_y","gyro_z","corrected_gyro_x","corrected_gyro_y","corrected_gyro_z","roll_deg","pitch_deg","relative_roll_deg","relative_pitch_deg","relative_tilt_deg","accel_norm_g","gyro_norm_dps","steady","valid","firmware_status"];
+    const DATASET_COLUMNS = ["sensor_uid","firmware_sensor_id","mount_site","body_part","side","subject_id","session_id","trial_id","action_label","phase_label","phase_elapsed_ms","phase_annotation_source","phase_annotation_reviewed","calibration_id","calibration_method_version","calibration_time_boot_ms","calibration_boot_id","calibrated","relative_angle_valid","relative_orientation_valid","unit_accel","unit_gyro","host_time_iso","host_time_s","host_received_time_iso","host_received_time_s","host_elapsed_ms","boot_ms","boot_id","seq","stream_epoch","gap_before","accel_x","accel_y","accel_z","gyro_x","gyro_y","gyro_z","corrected_gyro_x","corrected_gyro_y","corrected_gyro_z","roll_deg","pitch_deg","relative_roll_deg","relative_pitch_deg","relative_tilt_deg","accel_norm_g","gyro_norm_dps","steady","valid","firmware_status"];
 
     function applyPhaseLabels(recording) {
       const events = recording.phaseEvents.slice().sort(function (a,b) { return a.at_ms-b.at_ms; });
@@ -509,8 +562,12 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
       if (!completedAsPlanned) dataset$("guidedProgressLabel").textContent = "หยุดการบันทึก";
       if (!completedAsPlanned) dataset$("guidedOverallProgressLabel").textContent = "ความคืบหน้าทั้งรอบ: หยุดก่อนครบ";
       ["datasetMountSite","datasetBodyPart","datasetAction","datasetSide","datasetSubject","datasetSession","datasetTrial"].forEach(function (id) { dataset$(id).disabled = false; });
-      setDatasetPhaseButtons(false); setDatasetStatus("หยุดแล้ว", "done");
-      dataset$("datasetFeedback").textContent = (reason ? reason + " · " : "") + "ตรวจแก้ช่วง phase ได้ก่อนกดดาวน์โหลด CSV";
+      updateDatasetSideControl();
+      setDatasetPhaseButtons(false);
+      setDatasetStatus(completed.rows.length ? "หยุดแล้ว" : "ไม่มี sample", completed.rows.length ? "done" : "error");
+      dataset$("datasetFeedback").textContent = completed.rows.length
+        ? (reason ? reason + " · " : "") + "ตรวจแก้ช่วง phase ได้ก่อนกดดาวน์โหลด CSV"
+        : (reason ? reason + " · " : "") + "รอบนี้ไม่ได้รับ sample จาก ESP; CSV มีเพียงหัวตาราง ตรวจสถานะ Live/Wi-Fi ก่อนเริ่มรอบใหม่";
     }
 
     function addDatasetPhaseEvent(phase, source, elapsed) {
@@ -531,9 +588,11 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
       dataset$("datasetFeedback").textContent = "ทำเครื่องหมาย " + phase + " ที่ " + elapsed + " ms; เป็น cue ที่ต้องตรวจหลังหยุด";
     }
 
-    window.captureLiveSample = function (data) {
+    window.captureLiveSample = function (data, sampleHostTimeMs, batchReceivedAtMs) {
       latestLiveData = data;
       if (!activeRecording || !data || data.valid !== true) return originalCaptureSample(data);
+      sampleHostTimeMs = Number.isFinite(sampleHostTimeMs) ? sampleHostTimeMs : Date.now();
+      batchReceivedAtMs = Number.isFinite(batchReceivedAtMs) ? batchReceivedAtMs : Date.now();
       const key = String(data.sample_ms) + ":" + String(data.seq);
       if (key === activeRecording.lastSampleKey) return;
       const boot = Number(data.sample_ms), seq = Number(data.seq);
@@ -545,7 +604,7 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
         if (!activeRecording) return;
       }
       if (activeRecording.guidedSchedule) {
-        const guidedElapsed = Math.max(0, Date.now() - activeRecording.startedEpochMs);
+        const guidedElapsed = Math.max(0, sampleHostTimeMs - activeRecording.startedEpochMs);
         const lastPlannedMs = Math.max(0, activeRecording.guidedSchedule.total_ms - 1);
         const syncIndex = syncGuidedPhase(activeRecording, Math.min(guidedElapsed, lastPlannedMs));
         if (syncIndex < 0 || !activeRecording) return;
@@ -554,11 +613,17 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
       originalCaptureSample(data);
       if (activeRecording.rows.length === countBefore) return;
       const row = activeRecording.rows[activeRecording.rows.length - 1];
+      activeRecording.lastCapturedAtMs = Date.now();
+      if (activeRecording.streamStalled) {
+        activeRecording.streamStalled = false;
+        setDatasetStatus("กำลังบันทึก", "recording");
+        dataset$("datasetFeedback").textContent = "ได้รับ sample ใหม่แล้ว; บันทึกต่อได้ตามปกติ";
+      }
       if (activeRecording.lastSeq !== null && (seq <= activeRecording.lastSeq || boot < activeRecording.lastBootMs)) activeRecording.streamEpoch++;
       const gapBefore = activeRecording.lastSeq !== null && seq !== activeRecording.lastSeq + 1;
       if (gapBefore) activeRecording.gapCount++;
       activeRecording.lastSeq = seq; activeRecording.lastBootMs = boot; activeRecording.lastSampleKey = key;
-      const hostMs = Date.now();
+      const hostMs = sampleHostTimeMs;
       Object.assign(row, {
         sensor_uid: data.sensor_uid || data.sensor_id || activeRecording.sensorUid,
         firmware_sensor_id: data.sensor_id || activeRecording.firmwareSensorId,
@@ -574,7 +639,8 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
         relative_orientation_valid: data.relative_orientation_valid === true,
         unit_accel: "m/s^2", unit_gyro: "rad/s",
         host_time_iso: new Date(hostMs).toISOString(), host_time_s: (hostMs/1000).toFixed(6),
-        host_elapsed_ms: hostMs-activeRecording.startedEpochMs, boot_ms: boot, seq: seq,
+        host_received_time_iso: new Date(batchReceivedAtMs).toISOString(), host_received_time_s: (batchReceivedAtMs/1000).toFixed(6),
+        host_elapsed_ms: Math.max(0, hostMs-activeRecording.startedEpochMs), boot_ms: boot, boot_id: data.boot_id, seq: seq,
         stream_epoch: activeRecording.streamEpoch, gap_before: gapBefore,
         accel_x: Number(data.ax)*9.80665, accel_y: Number(data.ay)*9.80665, accel_z: Number(data.az)*9.80665,
         gyro_x: data.gx, gyro_y: data.gy, gyro_z: data.gz,
@@ -589,7 +655,13 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
     };
 
     document.querySelectorAll(".phase-mark").forEach(function (button) { button.addEventListener("click", function () { markDatasetPhase(button.dataset.phase); }); });
-    dataset$("datasetStart").addEventListener("click", startDatasetRecording);
+    dataset$("datasetStart").addEventListener("click", function () {
+      try { startDatasetRecording(); }
+      catch (error) {
+        console.error("Could not start dataset recording", error);
+        reportDatasetStartBlock("เริ่มบันทึกไม่สำเร็จ: " + (error && error.message ? error.message : String(error)), "datasetStart");
+      }
+    });
     dataset$("datasetStop").addEventListener("click", function () { finishDatasetRecording(""); });
     dataset$("recordingsList").style.display = "none";
     dataset$("recordTitle").style.display = "none";
@@ -598,38 +670,98 @@ LIVE_AND_CAPTURE_SCRIPT = r"""
     dataset$("guidedAddStep").addEventListener("click", appendGuidedStep);
 
     let liveInterval = 0, liveBusy = false, liveQ = [1,0,0,0], previousLiveTime = 0;
+    let liveBootId = null, liveAfterSeq = 0;
+
+    function consumeLiveSample(data, sampleHostTimeMs, receivedAtMs) {
+      latestLiveData = data;
+      if (data.mount_site && dataset$("datasetMountSite").value !== data.mount_site) dataset$("datasetMountSite").value = data.mount_site;
+      if (["left", "right"].includes(data.side) && datasetConfig.body_parts[dataset$("datasetBodyPart").value]?.side_mode !== "midline") dataset$("datasetSide").value = data.side;
+      updateDatasetSideControl();
+      dataset$("datasetMountSite").disabled = true;
+      dataset$("datasetDevice").textContent = (data.sensor_uid || data.sensor_id) + " | " + data.mount_site + " | " + (data.calibrated ? "calibrated" : "not calibrated");
+      if (typeof window.captureLiveSample === "function") {
+        try { window.captureLiveSample(data, sampleHostTimeMs, receivedAtMs); }
+        catch (captureError) {
+          dataset$("datasetFeedback").textContent = "Recording/phase processing error: " + captureError.message;
+          console.error("Live sample capture failed", captureError);
+        }
+      }
+      const accel = [data.ax,data.ay,data.az], gyro = [data.gx_corrected,data.gy_corrected,data.gz_corrected], time = Number(data.sample_ms)/1000;
+      if (!previousLiveTime) { liveQ = getInitialOrientation(accel,null); previousLiveTime=time; }
+      else {
+        const dt=time-previousLiveTime; previousLiveTime=time;
+        if(dt>0&&dt<0.25){let omega=gyro.slice();let correction=[0,0,0];
+          if(Math.abs(Math.hypot(...accel)-1)<0.4){const observed=vecNorm(accel),q=liveQ,expected=[2*(q[1]*q[3]-q[0]*q[2]),2*(q[0]*q[1]+q[2]*q[3]),q[0]*q[0]-q[1]*q[1]-q[2]*q[2]+q[3]*q[3]];correction=cross(observed,expected).map(function(v){return v*1.8;});}
+          omega=omega.map(function(v,j){return v+correction[j];});const d=qMultiply(liveQ,[0,omega[0],omega[1],omega[2]]);liveQ=qNormalize(liveQ.map(function(v,j){return v+d[j]*0.5*dt;}));
+        }
+      }
+      samples=[{t:time,q:liveQ.slice(),accel:accel,gyro:gyro,mag:null}];mode="live";currentIndex=0;updateReadouts(samples[0]);liveStatus.textContent="Live";setMessage("Live ESP32 | firmware status: "+data.status+" | separate from ML");
+    }
+
     function startLive() {
       if (liveInterval) return;
-      sourceLabel.textContent = "Live ESP32"; setMessage("กำลังเชื่อมต่อ ESP32…");
+      sourceLabel.textContent = "Live ESP32"; setMessage("Connecting to ESP32...");
       liveInterval = setInterval(async function () {
-        if (liveBusy) return; liveBusy = true;
+        if (liveBusy) return;
+        liveBusy = true;
         try {
-          const response = await fetch("/data?_t=" + Date.now(), {cache:"no-store"});
-          if (!response.ok) throw new Error("ESP /data ตอบ " + response.status);
-          const data = await response.json(); latestLiveData = data;
-          if (data.mount_site && dataset$("datasetMountSite").value !== data.mount_site) dataset$("datasetMountSite").value = data.mount_site;
-          dataset$("datasetMountSite").disabled = true;
-          dataset$("datasetDevice").textContent = (data.sensor_uid || data.sensor_id) + " · " + data.mount_site + " · " + (data.calibrated ? "calibrated" : "ยังไม่ calibrate");
-          if (typeof window.captureLiveSample === "function") {
-            try { window.captureLiveSample(data); }
-            catch (captureError) {
-              dataset$("datasetFeedback").textContent = "Recording/phase processing error: " + captureError.message;
-              console.error("Live sample capture failed", captureError);
-            }
+          const url = new URL("/samples", window.location.href);
+          if (liveBootId !== null) {
+            url.searchParams.set("boot_id", String(liveBootId));
+            url.searchParams.set("after_seq", String(liveAfterSeq));
           }
-          const accel = [data.ax,data.ay,data.az], gyro = [data.gx_corrected,data.gy_corrected,data.gz_corrected], time = data.sample_ms/1000;
-          if (!previousLiveTime) { liveQ = getInitialOrientation(accel,null); previousLiveTime=time; }
-          else {
-            const dt=time-previousLiveTime;previousLiveTime=time;
-            if(dt>0&&dt<0.25){let omega=gyro.slice();let correction=[0,0,0];
-              if(Math.abs(Math.hypot(...accel)-1)<0.4){const observed=vecNorm(accel),q=liveQ,expected=[2*(q[1]*q[3]-q[0]*q[2]),2*(q[0]*q[1]+q[2]*q[3]),q[0]*q[0]-q[1]*q[1]-q[2]*q[2]+q[3]*q[3]];correction=cross(observed,expected).map(function(v){return v*1.8;});}
-              omega=omega.map(function(v,j){return v+correction[j];});const d=qMultiply(liveQ,[0,omega[0],omega[1],omega[2]]);liveQ=qNormalize(liveQ.map(function(v,j){return v+d[j]*0.5*dt;}));
-            }
+          const response = await fetch(url.toString(), {cache:"no-store"});
+          if (!response.ok) throw new Error("ESP /samples HTTP " + response.status);
+          const batch = await response.json();
+          if (!batch || !Array.isArray(batch.samples) || !Number.isFinite(Number(batch.boot_id))) {
+            throw new Error("Invalid /samples response payload");
           }
-          samples=[{t:time,q:liveQ.slice(),accel:accel,gyro:gyro,mag:null}];mode="live";currentIndex=0;updateReadouts(samples[0]);liveStatus.textContent="Live";setMessage("รับข้อมูลจาก ESP32 · firmware status: "+data.status+" · แยกจากผล ML");
-        } catch(error) { liveStatus.textContent="Offline";setMessage("เชื่อมต่อไม่ได้: "+error.message,true);dataset$("datasetDevice").textContent="ESP ไม่พร้อม"; }
-        finally { liveBusy=false; }
-      },50);
+
+          const nextBootId = Number(batch.boot_id);
+          const rebooted = liveBootId !== null && nextBootId !== liveBootId;
+          if (rebooted) {
+            if (activeRecording) finishDatasetRecording("ESP reboot detected; the current trial was ended.");
+            liveQ = [1,0,0,0];
+            previousLiveTime = 0;
+            liveAfterSeq = 0;
+          }
+          liveBootId = nextBootId;
+
+          const fresh = batch.samples
+            .filter(function (data) { return data && data.valid === true && Number.isFinite(Number(data.seq)) && Number(data.seq) > liveAfterSeq; })
+            .sort(function (a,b) { return Number(a.seq) - Number(b.seq); });
+          const receivedAtMs = Date.now();
+          const newestSampleMs = fresh.length ? Number(fresh[fresh.length - 1].sample_ms) : 0;
+          fresh.forEach(function (data) {
+            if (Number(data.boot_id) !== liveBootId) return;
+            const deviceMs = Number(data.sample_ms);
+            const sampleHostTimeMs = receivedAtMs - Math.max(0, newestSampleMs - deviceMs);
+            consumeLiveSample(data, sampleHostTimeMs, receivedAtMs);
+            liveAfterSeq = Number(data.seq);
+          });
+
+          if (batch.dropped === true) {
+            const message = "ESP buffer overflow: sequence gaps were recorded; missing samples were not fabricated.";
+            setMessage(message, true);
+            if (activeRecording) dataset$("datasetFeedback").textContent = message;
+          }
+          if (activeRecording && Date.now() - activeRecording.lastCapturedAtMs > 1500 && !activeRecording.streamStalled) {
+            activeRecording.streamStalled = true;
+            setDatasetStatus("รอ sample", "error");
+            dataset$("datasetFeedback").textContent = activeRecording.rows.length
+              ? "ยังเปิด recording อยู่ แต่ไม่มี sample ใหม่เกิน 1.5 วินาที; ตรวจการเชื่อมต่อ ESP ก่อนกดหยุด"
+              : "เริ่ม recording แล้ว แต่ยังไม่มี sample ใหม่; ตรวจ IP/Wi-Fi และดูว่า ESP แสดง Live หรือไม่ ข้อมูลจะไม่ถูกสร้างซ้ำแทน sample ที่หาย";
+          }
+        } catch(error) {
+          liveStatus.textContent="Offline";
+          setMessage("ESP connection failed: "+error.message,true);
+          dataset$("datasetDevice").textContent="ESP offline";
+          if (activeRecording) {
+            setDatasetStatus("ESP offline", "error");
+            dataset$("datasetFeedback").textContent = "ESP หลุดระหว่าง recording: " + error.message + "; เชื่อมต่อกลับแล้วตรวจจำนวน sample ก่อนกดหยุด";
+          }
+        } finally { liveBusy=false; }
+      },100);
     }
     window.addEventListener("load", function () { initializeModelTestNavigation(); startLive(); });
 """
